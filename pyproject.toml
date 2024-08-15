@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "hmdriver2"
+version = "0.1.0"
+description = "Harmony Next ui automation framework"
+authors = ["chenli_gogo@163.com"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "^3.6"
+
+[tool.poetry.dev-dependencies]
+pytest = "^6.2.4"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
