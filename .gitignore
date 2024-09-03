@@ -12,11 +12,9 @@ imgs
 eggs
 bin
 venv
-node_modules
 pubilc
 tmp
 logs
-testresult
 *.ipa
 .mp4
 *.apk
@@ -24,5 +22,5 @@ testresult
 *.csv
 *.log
 .vscode*
-deploy.sh
-tests/images
+poetry.lock
+.pytest.cache

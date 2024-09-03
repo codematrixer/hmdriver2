@@ -1,15 +1,14 @@
 [tool.poetry]
 name = "hmdriver2"
-version = "0.1.0"
-description = "Harmony Next ui automation framework"
-authors = ["chenli_gogo@163.com"]
-license = "MIT"
+version = "1.0.1"
+description = "UI Test Automation library for HarmonyOS"
+authors = ["codematrixer <chenli_gogo@163.com>"]
 
 [tool.poetry.dependencies]
-python = "^3.6"
+python = "^3.8"
 
-[tool.poetry.dev-dependencies]
-pytest = "^6.2.4"
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.2"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
