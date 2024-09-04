@@ -32,9 +32,13 @@ class HMClient:
 
     @cached_property
     def local_port(self):
+        fports = self.hdc.list_fport()
+        logger.debug(fports) if fports else None
+
         return self.hdc.forward_port(UITEST_SERICE_PORT)
 
     def _rm_local_port(self):
+        logger.debug("rm fport local port")
         self.hdc.rm_forward(self.local_port, UITEST_SERICE_PORT)
 
     def _connect_sock(self):

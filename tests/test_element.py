@@ -11,10 +11,7 @@ def d():
     d = Driver("FMR0223C13000649")
     d.force_start_app("com.samples.test.uitest", "EntryAbility")
     yield d
-
-
-def test_force_start_app(d):
-    pass
+    d._client.release()
 
 
 def test_by_type(d):

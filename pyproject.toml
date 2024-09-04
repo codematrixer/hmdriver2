@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "hmdriver2"
 version = "1.0.1"
-description = "UI Test Automation library for HarmonyOS"
+description = "UI Automation Framework for Harmony Next"
 authors = ["codematrixer <chenli_gogo@163.com>"]
 
 [tool.poetry.dependencies]

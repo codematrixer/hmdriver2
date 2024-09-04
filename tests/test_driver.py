@@ -12,11 +12,19 @@ from hmdriver2.proto import KeyCode, DisplayRotation
 def d():
     d = Driver("FMR0223C13000649")
     yield d
+    d._client.release()
 
 
 def test_driver(d):
     dd = Driver("FMR0223C13000649")
     assert id(dd) == id(d)
+
+
+def test_device_info(d):
+    info = d.device_info
+    assert info.sdkVersion == "12"
+    assert info.cpuAbi == "arm64-v8a"
+    assert info.displaySize == (1260, 2720)
 
 
 def test_force_start_app(d):
@@ -29,6 +37,18 @@ def test_clear_app(d):
 
 def test_install_app(d):
     pass
+
+
+def test_uninstall_app(d):
+    pass
+
+
+def test_list_apps(d):
+    assert "com.kuaishou.hmapp" in d.list_apps()
+
+
+def test_has_app(d):
+    assert d.has_app("com.kuaishou.hmapp")
 
 
 def test_go_back(d):

@@ -28,6 +28,18 @@ class DisplayRotation(Enum):
 
 
 @dataclass
+class DeviceInfo:
+    productName: str
+    model: str
+    sdkVersion: str
+    sysVersion: str
+    cpuAbi: str
+    wlanIp: str
+    displaySize: tuple
+    displayRotation: DisplayRotation
+
+
+@dataclass
 class HypiumResponse:
     result: Union[List, bool, str, None]  # {"result":"Driver#0"}
 

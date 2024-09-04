@@ -3,7 +3,7 @@
 import atexit
 import time
 import uuid
-from typing import Type, Any, Tuple, Dict, Union
+from typing import Type, Any, Tuple, Dict, Union, List
 
 try:
     # Python3.8+
@@ -16,7 +16,7 @@ from .exception import DeviceNotFoundError
 from ._client import HMClient
 from ._uiobject import UiObject
 from .hdc import list_devices
-from .proto import HypiumResponse, KeyCode, Point, DisplayRotation
+from .proto import HypiumResponse, KeyCode, Point, DisplayRotation, DeviceInfo
 
 
 class Driver:
@@ -65,6 +65,15 @@ class Driver:
     def install_app(self, apk_path: str):
         self.hdc.install(apk_path)
 
+    def uninstall_app(self, package_name: str):
+        self.hdc.uninstall(package_name)
+
+    def list_apps(self) -> List:
+        return self.hdc.list_apps()
+
+    def has_app(self, package_name: str) -> bool:
+        return self.hdc.has_app(package_name)
+
     def go_back(self):
         self.hdc.send_key(KeyCode.BACK)
 
@@ -99,6 +108,20 @@ class Driver:
         api = "Driver.getDisplayRotation"
         value = self._client.invoke(api, self._this_driver).result
         return DisplayRotation.from_value(value)
+
+    @cached_property
+    def device_info(self) -> DeviceInfo:
+        hdc = self.hdc
+        return DeviceInfo(
+            productName=hdc.product_name(),
+            model=hdc.model(),
+            sdkVersion=hdc.sdk_version(),
+            sysVersion=hdc.sys_version(),
+            cpuAbi=hdc.cpu_abi(),
+            wlanIp=hdc.wlan_ip(),
+            displaySize=self.display_size,
+            displayRotation=self.display_rotation
+        )
 
     def open_url(self, url: str):
         self.hdc.shell(f"aa start -U {url}")
@@ -138,7 +161,6 @@ class Driver:
     def click(self, x: Union[int, float], y: Union[int, float]):
 
         # self.hdc.tap(point.x, point.y)
-
         point = self._to_abs_pos(x, y)
         api = "Driver.click"
         self._client.invoke(api, self._this_driver, args=[point.x, point.y])
