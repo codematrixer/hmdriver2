@@ -141,3 +141,19 @@ def test_swipe(d):
 
 def test_input_text(d):
     d.input_text(0.5, 0.5, "adbcdfg")
+
+
+def test_dump_hierarchy(d):
+    data = d.dump_hierarchy()
+    print(data)
+    assert data
+
+
+def test_toast(d):
+    d.unlock()
+    d.force_start_app("com.samples.test.uitest", "EntryAbility")
+    d.toast_watcher.start()
+    d(type="Button", text="showToast").click()
+    toast = d.toast_watcher.get()
+    print(f"toast: {toast}")
+    assert toast == "testMessage"

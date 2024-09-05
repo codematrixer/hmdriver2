@@ -168,6 +168,27 @@
 {"result":"UiWindow#10"}
 ```
 
+### uiEventObserverOnce
+**send**
+```
+{"module":"com.ohos.devicetest.hypiumApiHelper","method":"callHypiumApi","params":{"api":"Driver.uiEventObserverOnce","this":"Driver#0","args":["toastShow"],"message_type":"hypium"},"request_id":"20240905144543056211","client":"127.0.0.1"}
+```
+**recv**
+```
+{"result":true}
+```
+
+
+### getRecentUiEvent
+**send**
+```
+{"module":"com.ohos.devicetest.hypiumApiHelper","method":"callHypiumApi","params":{"api":"Driver.getRecentUiEvent","this":"Driver#0","args":[3000],"message_type":"hypium"},"request_id":"20240905143857794307","client":"127.0.0.1"}
+```
+**recv**
+```
+{"result":{"bundleName":"com.samples.test.uitest","text":"testMessage","type":"Toast"}}
+```
+
 
 ## Component
 ### Component.getId

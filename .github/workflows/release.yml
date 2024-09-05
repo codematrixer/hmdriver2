@@ -1,8 +1,12 @@
 name: Release
 
+# on:
+#   release:
+#     types: [created]
 on:
-  release:
-    types: [created]
+  push:
+    tags:
+      - '*.*.*'
 
 jobs:
   build-n-publish:
@@ -20,6 +24,15 @@ jobs:
         python -m pip install --upgrade pip
         pip install setuptools wheel twine poetry
         poetry install
+
+    - name: Get the version from the tag
+      id: get_version
+      run: echo "::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}"
+
+    - name: Update version in pyproject.toml
+      run: |
+        version=${{ steps.get_version.outputs.VERSION }}
+        poetry version $version
 
     - name: Build a binary wheel and a source tarball
       run: poetry build

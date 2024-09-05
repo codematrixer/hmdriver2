@@ -64,7 +64,7 @@ class HMClient:
             }
         """
         msg = json.dumps(msg, ensure_ascii=False, separators=(',', ':'))
-        logger.debug(f"send msg: {msg}")
+        logger.debug(f"sendMsg: {msg}")
         self.sock.sendall(msg.encode('utf-8') + b'\n')
 
     def _recv_msg(self, buff_size: int = 1024, decode=False) -> typing.Union[bytearray, str]:
@@ -72,7 +72,7 @@ class HMClient:
             relay = self.sock.recv(buff_size)
             if decode:
                 relay = relay.decode()
-            logger.debug(f"recv msg: {relay}")
+            logger.debug(f"recvMsg: {relay}")
             return relay
         except (socket.timeout, UnicodeDecodeError) as e:
             logger.warning(e)
@@ -100,14 +100,6 @@ class HMClient:
         return HypiumResponse(**(json.loads(result)))
 
     def start(self):
-        """
-
-        Args:
-            file_path (str): Path where the recorded video will be saved.
-
-        Raises:
-            RuntimeError: If the screen capture fails to start.
-        """
         logger.info("Start client connection")
         self._init_so_resource()
         self._restart_uitest_service()
@@ -115,11 +107,6 @@ class HMClient:
         self._connect_sock()
 
     def release(self):
-        """
-
-        Raises:
-            RuntimeError: If the screen capture fails to start.
-        """
         logger.info("Release client connection")
         try:
             if self.sock:
@@ -176,6 +163,7 @@ class HMClient:
     def _restart_uitest_service(self):
         """
         Restart the UITest daemon.
+
         Note: 'hdc shell aa test' will also start a uitest daemon.
         $ hdc shell ps -ef |grep uitest
         shell        44306     1 25 11:03:37 ?    00:00:16 uitest start-daemon singleness

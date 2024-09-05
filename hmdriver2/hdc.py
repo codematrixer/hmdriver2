@@ -7,7 +7,7 @@ import shlex
 import socket
 import re
 import subprocess
-from typing import Union, List
+from typing import Union, List, Dict
 
 from . import logger
 from .proto import CommandResult, KeyCode
@@ -81,7 +81,7 @@ class HdcWrapper:
 
     def list_fport(self) -> List:
         """
-        eg. ['tcp:10001 tcp:8012', 'tcp:10255 tcp:8012']
+        eg.['tcp:10001 tcp:8012', 'tcp:10255 tcp:8012']
         """
         result = _execute_command(f"hdc -t {self.serial} fport ls")
         if result.exit_code != 0:
@@ -196,9 +196,6 @@ class HdcWrapper:
         self.shell(f"uitest uiInput click {x} {y}")
 
     def swipe(self, x1, y1, x2, y2, speed=1000):
-        """
-        speed为滑动速率, 范围:200-40000, 不在范围内设为默认值为600, 单位: 像素点/秒
-        """
         self.shell(f"uitest uiInput swipe {x1} {y1} {x2} {y2} {speed}")
 
     def input_text(self, x: int, y: int, text: str):
@@ -212,7 +209,7 @@ class HdcWrapper:
         self.shell(f"rm -rf {_tmp_path}")  # remove local path
         return path
 
-    def dump_hierarchy(self) -> dict:
+    def dump_hierarchy(self) -> Dict:
         _tmp_path = "/data/local/tmp/_tmp.json"
         self.shell(f"uitest dumpLayout -p {_tmp_path}")
 
@@ -224,7 +221,7 @@ class HdcWrapper:
                 with open(path, 'r') as file:
                     data = json.load(file)
             except Exception as e:
-                print(f"Error loading JSON file: {e}")
+                logger.error(f"Error loading JSON file: {e}")
                 data = {}
 
             return data

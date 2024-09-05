@@ -63,7 +63,7 @@ d.screenshot(lpath)
 
 # Device touch
 d.click(500, 1000)
-d.click(0.5, 0.4)
+d.click(0.5, 0.4)  # "If of type float, it represents percentage coordinates."
 d.double_click(500, 1000)
 d.double_click(0.5, 0.4)
 d.long_click(500, 1000)
@@ -100,21 +100,28 @@ d(text="showToast").info
 # }
 
 d(id="swiper").exists()
-d(type="Button", text="showToast").exists()
-d(text="showToast", isAfter=True).exists()
-d(text="showToast").click_if_exists()
+d(type="Button", text="tab_recrod").exists()
+d(text="tab_recrod", isAfter=True).exists()
+d(text="tab_recrod").click_if_exists()
 d(type="Button", index=3).click()
-d(text="showToast").double_click()
-d(text="showToast").long_click()
+d(text="tab_recrod").double_click()
+d(text="tab_recrod").long_click()
 
 component: ComponentData = d(type="ListItem", index=1).find_component()
 d(type="ListItem").drag_to(component)
 
-d(text="showToast").input_text("abc")
-d(text="showToast").clear_text()
-d(text="showToast").pinch_in()
-d(text="showToast").pinch_out()
+d(text="tab_recrod").input_text("abc")
+d(text="tab_recrod").clear_text()
+d(text="tab_recrod").pinch_in()
+d(text="tab_recrod").pinch_out()
 
+# Dump hierarchy
+d.dump_hierarchy()
+
+# Toast Watcher
+d.toast_watcher.start()
+d(type="Button", text="tab_recrod").click()  # 触发toast的操作
+toast = d.toast_watcher.get()
 
 ```
 
