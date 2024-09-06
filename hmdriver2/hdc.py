@@ -76,7 +76,7 @@ class HdcWrapper:
     def rm_forward(self, lport: int, rport: int) -> int:
         result = _execute_command(f"hdc -t {self.serial} fport rm tcp:{lport} tcp:{rport}")
         if result.exit_code != 0:
-            raise RuntimeError("HDC forward port error", result.output)
+            raise RuntimeError("HDC rm forward error", result.output)
         return lport
 
     def list_fport(self) -> List:

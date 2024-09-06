@@ -10,11 +10,11 @@ try:
 except ImportError:
     from cached_property import cached_property
 
-from .exception import DeviceNotFoundError
 from ._client import HMClient
 from ._uiobject import UiObject
 from .hdc import list_devices
 from ._toast import ToastWatcher
+from .exception import DeviceNotFoundError
 from .proto import HypiumResponse, KeyCode, Point, DisplayRotation, DeviceInfo
 
 
@@ -49,6 +49,9 @@ class Driver:
     def _is_device_online(self):
         _serials = list_devices()
         return True if self.serial in _serials else False
+
+    def _invoke(self, api: str, args: List = []) -> HypiumResponse:
+        return self._client.invoke(api, this=self._this_driver, args=args)
 
     def start_app(self, package_name: str, page_name: str = "MainAbility"):
         self.unlock()
@@ -102,9 +105,6 @@ class Driver:
         w, h = self.display_size
         self.hdc.swipe(0.5 * w, 0.8 * h, 0.5 * w, 0.2 * h)
         time.sleep(.5)
-
-    def _invoke(self, api: str, args: List = []) -> HypiumResponse:
-        return self._client.invoke(api, this=self._this_driver, args=args)
 
     @cached_property
     def display_size(self) -> Tuple[int, int]:

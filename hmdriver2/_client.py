@@ -6,7 +6,6 @@ import time
 import os
 import typing
 import subprocess
-import atexit
 import hashlib
 from datetime import datetime
 from functools import cached_property
@@ -14,10 +13,11 @@ from functools import cached_property
 from . import logger
 from .hdc import HdcWrapper
 from .proto import HypiumResponse, DriverData
+from .exception import InvokeHypiumError
 
 
-UITEST_SERICE_PORT = 8012
-SOCKET_TIMEOUT = 60
+UITEST_SERVICE_PORT = 8012
+SOCKET_TIMEOUT = 30
 
 
 class HMClient:
@@ -35,11 +35,11 @@ class HMClient:
         fports = self.hdc.list_fport()
         logger.debug(fports) if fports else None
 
-        return self.hdc.forward_port(UITEST_SERICE_PORT)
+        return self.hdc.forward_port(UITEST_SERVICE_PORT)
 
     def _rm_local_port(self):
         logger.debug("rm fport local port")
-        self.hdc.rm_forward(self.local_port, UITEST_SERICE_PORT)
+        self.hdc.rm_forward(self.local_port, UITEST_SERVICE_PORT)
 
     def _connect_sock(self):
         """Create socket and connect to the uiTEST server."""
@@ -81,6 +81,20 @@ class HMClient:
             return bytearray()
 
     def invoke(self, api: str, this: str = "Driver#0", args: typing.List = []) -> HypiumResponse:
+        """
+        Invokes a given API method with the specified arguments and handles exceptions.
+
+        Args:
+        api (str): The name of the API method to invoke.
+        args (List, optional): A list of arguments to pass to the API method. Default is an empty list.
+
+        Returns:
+        HypiumResponse: The response from the API call.
+
+        Raises:
+        InvokeHypiumError: If the API call returns an exception in the response.
+        """
+
         msg = {
             "module": "com.ohos.devicetest.hypiumApiHelper",
             "method": "callHypiumApi",
@@ -93,11 +107,11 @@ class HMClient:
             "request_id": datetime.now().strftime("%Y%m%d%H%M%S%f")
         }
         self._send_msg(msg)
-        result = self._recv_msg(decode=True)
-        # TODO handle exception
-        # {"exception":{"code":401,"message":"(PreProcessing: APiCallInfoChecker)Illegal argument count"}}
-
-        return HypiumResponse(**(json.loads(result)))
+        raw_data = self._recv_msg(decode=True)
+        data = HypiumResponse(**(json.loads(raw_data)))
+        if data.exception:
+            raise InvokeHypiumError(data.exception)
+        return data
 
     def start(self):
         logger.info("Start client connection")

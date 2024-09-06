@@ -8,7 +8,7 @@ class ElementFoundTimeout(Exception):
     pass
 
 
-class HDriverError(Exception):
+class HmDriverError(Exception):
     pass
 
 
@@ -16,9 +16,9 @@ class DeviceNotFoundError(Exception):
     pass
 
 
-class HDCException(Exception):
+class HdcError(Exception):
     pass
 
 
-class AttributeException(Exception):
+class InvokeHypiumError(Exception):
     pass

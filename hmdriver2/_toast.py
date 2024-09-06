@@ -4,8 +4,8 @@ from .proto import HypiumResponse
 
 
 class ToastWatcher:
-    def __init__(self, session: "Driver"):  # type: ignore
-        self.session = session
+    def __init__(self, driver: "Driver"):  # type: ignore
+        self.driver = driver
 
     def start(self) -> bool:
         """
@@ -15,10 +15,10 @@ class ToastWatcher:
             bool: True if the observer starts successfully, else False.
         """
         api = "Driver.uiEventObserverOnce"
-        resp: HypiumResponse = self.session._invoke(api, args=["toastShow"])
+        resp: HypiumResponse = self.driver._invoke(api, args=["toastShow"])
         return resp.result
 
-    def get(self, timeout: int = 5) -> str:
+    def get(self, timeout: int = 3) -> str:
         """
         Read the latest toast message content from the recent period.
 
@@ -29,7 +29,7 @@ class ToastWatcher:
             str: The content of the latest toast message.
         """
         api = "Driver.getRecentUiEvent"
-        resp: HypiumResponse = self.session._invoke(api, args=[timeout])
+        resp: HypiumResponse = self.driver._invoke(api, args=[timeout])
         if resp.result:
             return resp.result.get("text")
         return None

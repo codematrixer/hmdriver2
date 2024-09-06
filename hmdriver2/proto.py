@@ -41,7 +41,15 @@ class DeviceInfo:
 
 @dataclass
 class HypiumResponse:
-    result: Union[List, bool, str, None]  # {"result":"Driver#0"}
+    """
+    Example:
+    {"result":"On#1"}
+    {"result":null}
+    {"result":null,"exception":"Can not connect to AAMS, RET_ERR_CONNECTION_EXIST"}
+    {"exception":{"code":401,"message":"(PreProcessing: APiCallInfoChecker)Illegal argument count"}}
+    """
+    result: Union[List, bool, str, None] = None
+    exception: Union[List, bool, str, None] = None
 
 
 @dataclass
