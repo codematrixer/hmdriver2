@@ -15,7 +15,7 @@ from ._client import HMClient
 from ._uiobject import UiObject
 from .hdc import list_devices
 from .exception import DeviceNotFoundError
-from .proto import HypiumResponse, KeyCode, Point, DisplayRotation, DeviceInfo
+from .proto import HypiumResponse, KeyCode, Point, DisplayRotation, DeviceInfo, CommandResult
 
 
 class Driver:
@@ -53,6 +53,7 @@ class Driver:
     def _invoke(self, api: str, args: List = []) -> HypiumResponse:
         return self._client.invoke(api, this=self._this_driver, args=args)
 
+    @delay
     def start_app(self, package_name: str, page_name: str = "MainAbility"):
         self.hdc.start_app(package_name, page_name)
 
@@ -202,8 +203,8 @@ class Driver:
         self.shell(f"rm -rf {_tmp_path}")  # remove local path
         return path
 
-    def shell(self, cmd):
-        self.hdc.shell(cmd)
+    def shell(self, cmd) -> CommandResult:
+        return self.hdc.shell(cmd)
 
     def _to_abs_pos(self, x: Union[int, float], y: Union[int, float]) -> Point:
         """
