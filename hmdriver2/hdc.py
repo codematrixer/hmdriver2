@@ -4,33 +4,14 @@ import tempfile
 import json
 import uuid
 import shlex
-import socket
 import re
 import subprocess
 from typing import Union, List, Dict
 
 from . import logger
+from .utils import FreePort
 from .proto import CommandResult, KeyCode
-
-
-class _FreePort:
-    def __init__(self):
-        self._start = 10000
-        self._end = 20000
-        self._now = self._start - 1
-
-    def get(self) -> int:
-        while True:
-            self._now += 1
-            if self._now > self._end:
-                self._now = self._start
-            if not self.is_port_in_use(self._now):
-                return self._now
-
-    @staticmethod
-    def is_port_in_use(port: int) -> bool:
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            return s.connect_ex(('localhost', port)) == 0
+from .exception import HdcError
 
 
 def _execute_command(cmdargs: Union[str, List[str]]) -> CommandResult:
@@ -67,16 +48,16 @@ class HdcWrapper:
         self.serial = serial
 
     def forward_port(self, rport: int) -> int:
-        lport: int = _FreePort().get()
+        lport: int = FreePort().get()
         result = _execute_command(f"hdc -t {self.serial} fport tcp:{lport} tcp:{rport}")
         if result.exit_code != 0:
-            raise RuntimeError("HDC forward port error", result.output)
+            raise HdcError("HDC forward port error", result.output)
         return lport
 
     def rm_forward(self, lport: int, rport: int) -> int:
         result = _execute_command(f"hdc -t {self.serial} fport rm tcp:{lport} tcp:{rport}")
         if result.exit_code != 0:
-            raise RuntimeError("HDC rm forward error", result.output)
+            raise HdcError("HDC rm forward error", result.output)
         return lport
 
     def list_fport(self) -> List:
@@ -85,38 +66,38 @@ class HdcWrapper:
         """
         result = _execute_command(f"hdc -t {self.serial} fport ls")
         if result.exit_code != 0:
-            raise RuntimeError("HDC forward list error", result.output)
+            raise HdcError("HDC forward list error", result.output)
         pattern = re.compile(r"tcp:\d+ tcp:\d+")
         return pattern.findall(result.output)
 
     def send_file(self, lpath: str, rpath: str):
         result = _execute_command(f"hdc -t {self.serial} file send {lpath} {rpath}")
         if result.exit_code != 0:
-            raise RuntimeError("HDC send file error", result.output)
+            raise HdcError("HDC send file error", result.output)
         return result
 
     def recv_file(self, rpath: str, lpath: str):
         result = _execute_command(f"hdc -t {self.serial} file recv {rpath} {lpath}")
         if result.exit_code != 0:
-            raise RuntimeError("HDC receive file error", result.output)
+            raise HdcError("HDC receive file error", result.output)
         return result
 
     def shell(self, cmd: str, error_raise=True) -> CommandResult:
         result = _execute_command(f"hdc -t {self.serial} shell {cmd}")
         if result.error and error_raise:
-            raise RuntimeError("HDC shell error", f"{cmd}\n{result.output}\n{result.error}")
+            raise HdcError("HDC shell error", f"{cmd}\n{result.output}\n{result.error}")
         return result
 
     def uninstall(self, bundlename: str):
         result = _execute_command(f"hdc -t {self.serial} uninstall {bundlename}")
         if result.exit_code != 0:
-            raise RuntimeError("HDC uninstall error", result.output)
+            raise HdcError("HDC uninstall error", result.output)
         return result
 
     def install(self, apkpath: str):
         result = _execute_command(f"hdc -t {self.serial} install {apkpath}")
         if result.exit_code != 0:
-            raise RuntimeError("HDC install error", result.output)
+            raise HdcError("HDC install error", result.output)
         return result
 
     def list_apps(self) -> List[str]:
@@ -185,7 +166,7 @@ class HdcWrapper:
 
         MAX = 3200
         if key_code > MAX:
-            raise ValueError("Invalid HDC keycode")
+            raise HdcError("Invalid HDC keycode")
 
         self.shell(f"uitest uiInput keyEvent {key_code}")
 

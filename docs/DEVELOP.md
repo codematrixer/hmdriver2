@@ -189,6 +189,46 @@
 {"result":{"bundleName":"com.samples.test.uitest","text":"testMessage","type":"Toast"}}
 ```
 
+### PointerMatrix.create
+**send**
+```
+{"module":"com.ohos.devicetest.hypiumApiHelper","method":"callHypiumApi","params":{"api":"PointerMatrix.create","this":null,"args":[1,104],"message_type":"hypium"},"request_id":"20240906204116056319"}
+```
+**recv**
+```
+{"result":"PointerMatrix#0"}
+```
+
+### PointerMatrix.setPoint
+**send**
+```
+{"module":"com.ohos.devicetest.hypiumApiHelper","method":"callHypiumApi","params":{"api":"PointerMatrix.setPoint","this":"PointerMatrix#0","args":[0,0,{"x":65536630,"y":984}],"message_type":"hypium"},"request_id":"20240906204116061416"}
+
+{"module":"com.ohos.devicetest.hypiumApiHelper","method":"callHypiumApi","params":{"api":"PointerMatrix.setPoint","this":"PointerMatrix#0","args":[0,1,{"x":3277430,"y":984}],"message_type":"hypium"},"request_id":"20240906204116069343"}
+
+{"module":"com.ohos.devicetest.hypiumApiHelper","method":"callHypiumApi","params":{"api":"PointerMatrix.setPoint","this":"PointerMatrix#0","args":[0,2,{"x":3277393,"y":994}],"message_type":"hypium"},"request_id":"20240906204116072723"}
+
+...
+
+{"module":"com.ohos.devicetest.hypiumApiHelper","method":"callHypiumApi","params":{"api":"PointerMatrix.setPoint","this":"PointerMatrix#0","args":[0,102,{"x":2622070,"y":1632}],"message_type":"hypium"},"request_id":"20240906204116359992"}
+
+{"module":"com.ohos.devicetest.hypiumApiHelper","method":"callHypiumApi","params":{"api":"PointerMatrix.setPoint","this":"PointerMatrix#0","args":[0,103,{"x":633,"y":1632}],"message_type":"hypium"},"request_id":"20240906204116363228"}
+```
+**recv**
+```
+{"result":null}
+```
+
+### injectMultiPointerAction
+**send**
+```
+{"module":"com.ohos.devicetest.hypiumApiHelper","method":"callHypiumApi","params":{"api":"Driver.injectMultiPointerAction","this":"Driver#0","args":["PointerMatrix#0",2000],"message_type":"hypium"},"request_id":"20240906204116366578"}
+```
+**recv**
+```
+{"result":true}
+```
+
 
 ## Component
 ### Component.getId

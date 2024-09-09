@@ -10,11 +10,12 @@ try:
 except ImportError:
     from cached_property import cached_property
 
+from .utils import delay
 from ._client import HMClient
 from ._uiobject import UiObject
 from .hdc import list_devices
-from ._toast import ToastWatcher
 from .exception import DeviceNotFoundError
+from ._gesture import _Gesture
 from .proto import HypiumResponse, KeyCode, Point, DisplayRotation, DeviceInfo
 
 
@@ -54,7 +55,6 @@ class Driver:
         return self._client.invoke(api, this=self._this_driver, args=args)
 
     def start_app(self, package_name: str, page_name: str = "MainAbility"):
-        self.unlock()
         self.hdc.start_app(package_name, page_name)
 
     def force_start_app(self, package_name: str, page_name: str = "MainAbility"):
@@ -84,12 +84,35 @@ class Driver:
     def has_app(self, package_name: str) -> bool:
         return self.hdc.has_app(package_name)
 
+    @cached_property
+    def toast_watcher(self):
+
+        obj = self
+
+        class _Watcher:
+            def start(self) -> bool:
+                api = "Driver.uiEventObserverOnce"
+                resp: HypiumResponse = obj._invoke(api, args=["toastShow"])
+                return resp.result
+
+            def get_toast(self, timeout: int = 3) -> str:
+                api = "Driver.getRecentUiEvent"
+                resp: HypiumResponse = obj._invoke(api, args=[timeout])
+                if resp.result:
+                    return resp.result.get("text")
+                return None
+
+        return _Watcher()
+
+    @delay
     def go_back(self):
         self.hdc.send_key(KeyCode.BACK)
 
+    @delay
     def go_home(self):
         self.hdc.send_key(KeyCode.HOME)
 
+    @delay
     def press_key(self, key_code: Union[KeyCode, int]):
         self.hdc.send_key(key_code)
 
@@ -100,11 +123,11 @@ class Driver:
         self.hdc.wakeup()
         self.press_key(KeyCode.POWER)
 
+    @delay
     def unlock(self):
         self.screen_on()
         w, h = self.display_size
-        self.hdc.swipe(0.5 * w, 0.8 * h, 0.5 * w, 0.2 * h)
-        time.sleep(.5)
+        self.hdc.swipe(0.5 * w, 0.8 * h, 0.5 * w, 0.2 * h, speed=600)
 
     @cached_property
     def display_size(self) -> Tuple[int, int]:
@@ -139,10 +162,7 @@ class Driver:
             displayRotation=self.display_rotation
         )
 
-    @cached_property
-    def toast_watcher(self):
-        return ToastWatcher(self)
-
+    @delay
     def open_url(self, url: str):
         self.hdc.shell(f"aa start -U {url}")
 
@@ -208,6 +228,7 @@ class Driver:
             y = int(h * y)
         return Point(x, y)
 
+    @delay
     def click(self, x: Union[int, float], y: Union[int, float]):
 
         # self.hdc.tap(point.x, point.y)
@@ -215,16 +236,19 @@ class Driver:
         api = "Driver.click"
         self._invoke(api, args=[point.x, point.y])
 
+    @delay
     def double_click(self, x: Union[int, float], y: Union[int, float]):
         point = self._to_abs_pos(x, y)
         api = "Driver.doubleClick"
         self._invoke(api, args=[point.x, point.y])
 
+    @delay
     def long_click(self, x: Union[int, float], y: Union[int, float]):
         point = self._to_abs_pos(x, y)
         api = "Driver.longClick"
         self._invoke(api, args=[point.x, point.y])
 
+    @delay
     def swipe(self, x1, y1, x2, y2, speed=1000):
         """
         Perform a swipe action on the device screen.
@@ -241,9 +265,14 @@ class Driver:
 
         self.hdc.swipe(point1.x, point1.y, point2.x, point2.y, speed=speed)
 
+    @delay
     def input_text(self, x, y, text: str):
         point = self._to_abs_pos(x, y)
         self.hdc.input_text(point.x, point.y, text)
+
+    @cached_property
+    def gesture(self):
+        return _Gesture(self)
 
     def dump_hierarchy(self) -> Dict:
         """

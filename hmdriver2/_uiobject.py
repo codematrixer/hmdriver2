@@ -5,6 +5,7 @@ import time
 from typing import List, Union
 
 from . import logger
+from .utils import delay
 from ._client import HMClient
 from .exception import ElementNotFoundError
 from .proto import DriverData, ComponentData, ByData, HypiumResponse, Point, Rect, ElementInfo
@@ -67,18 +68,18 @@ class UiObject:
         return self.count
 
     def exists(self, retries: int = 2, wait_time=1) -> bool:
-        component = self.find_component(retries, wait_time)
-        return True if component else False
+        obj = self.find_component(retries, wait_time)
+        return True if obj else False
 
     def __set_component(self, component: ComponentData):
         self._component = component
 
-    def find_component(self, retries: int = 1, wait_time=1) -> Union[ComponentData, None]:
+    def find_component(self, retries: int = 1, wait_time=1) -> 'UiObject':
         for attempt in range(retries):
             components = self.__find_components()
             if components and self._index < len(components):
                 self.__set_component(components[self._index])
-                return self._component
+                return self
 
             if attempt < retries:
                 time.sleep(wait_time)
@@ -209,32 +210,41 @@ class UiObject:
             bounds=self.bounds,
             boundsCenter=self.boundsCenter)
 
+    @delay
     def click(self):
         return self.__operate("Component.click")
 
+    @delay
     def click_if_exists(self):
         try:
             return self.__operate("Component.click")
         except ElementNotFoundError:
             pass
 
+    @delay
     def double_click(self):
         return self.__operate("Component.doubleClick")
 
+    @delay
     def long_click(self):
         return self.__operate("Component.longClick")
 
+    @delay
     def drag_to(self, component: ComponentData):
         return self.__operate("Component.dragTo", [component.value])
 
+    @delay
     def input_text(self, text: str):
         return self.__operate("Component.inputText", [text])
 
+    @delay
     def clear_text(self):
         return self.__operate("Component.clearText")
 
+    @delay
     def pinch_in(self, scale: float = 0.5):
         return self.__operate("Component.pinchIn", [scale])
 
+    @delay
     def pinch_out(self, scale: float = 2):
         return self.__operate("Component.pinchOut", [scale])

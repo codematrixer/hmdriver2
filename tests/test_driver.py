@@ -28,11 +28,12 @@ def test_device_info(d):
 
 
 def test_force_start_app(d):
-    d.force_start_app("com.kuaishou.hmapp", "EntryAbility")
+    d.unlock()
+    d.force_start_app("com.samples.test.uitest", "EntryAbility")
 
 
 def test_clear_app(d):
-    d.clear_app("com.kuaishou.hmapp")
+    d.clear_app("com.samples.test.uitest")
 
 
 def test_install_app(d):
@@ -150,10 +151,19 @@ def test_dump_hierarchy(d):
 
 
 def test_toast(d):
-    d.unlock()
     d.force_start_app("com.samples.test.uitest", "EntryAbility")
     d.toast_watcher.start()
     d(type="Button", text="showToast").click()
-    toast = d.toast_watcher.get()
+    toast = d.toast_watcher.get_toast()
     print(f"toast: {toast}")
     assert toast == "testMessage"
+
+
+def test_gesture(d):
+    d(id="drag").click()
+    d.gesture.start(630, 984, interval=1).move(0.2, 0.4, interval=.5).pause(interval=1).move(0.5, 0.6, interval=.5).pause(interval=1).action()
+    d.go_back()
+
+
+def test_gesture_click(d):
+    d.gesture.start(0.77, 0.49).action()

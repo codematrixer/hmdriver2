@@ -71,6 +71,7 @@ def test_info(d):
 
 def test_click(d):
     d(text="showToast1").click_if_exists()
+    d(text="showToast").find_component().click()
     d(type="Button", index=3).click()
     d.click(0.5, 0.2)
 

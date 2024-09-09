@@ -71,13 +71,35 @@ d.long_click(0.5, 0.4)
 d.swipe(0.5, 0.8, 0.5, 0.4, speed=2000)
 d.input_text(0.5, 0.5, "adbcdfg")
 
+
+# Device touch gersture
+d.gesture.start(630, 984, interval=.5).move(0.2, 0.4).pause(interval=1).move(0.5, 0.6).action()
+d.gesture.start(0.77, 0.49).action() # click
+
+
 # App Element
-d(text="showToast").info
+d(id="swiper").exists()
+d(type="Button", text="tab_recrod").exists()
+d(text="tab_recrod", isAfter=True).exists()
+d(text="tab_recrod").click_if_exists()
+d(type="Button", index=3).click()
+d(text="tab_recrod").double_click()
+d(text="tab_recrod").long_click()
+
+component: ComponentData = d(type="ListItem", index=1).find_component()
+d(type="ListItem").drag_to(component)
+
+d(text="tab_recrod").input_text("abc")
+d(text="tab_recrod").clear_text()
+d(text="tab_recrod").pinch_in()
+d(text="tab_recrod").pinch_out()
+
+d(text="tab_recrod").info
 # {
 #     "id": "",
 #     "key": "",
 #     "type": "Button",
-#     "text": "showToast",
+#     "text": "tab_recrod",
 #     "description": "",
 #     "isSelected": False,
 #     "isChecked": False,
@@ -99,21 +121,6 @@ d(text="showToast").info
 #     }
 # }
 
-d(id="swiper").exists()
-d(type="Button", text="tab_recrod").exists()
-d(text="tab_recrod", isAfter=True).exists()
-d(text="tab_recrod").click_if_exists()
-d(type="Button", index=3).click()
-d(text="tab_recrod").double_click()
-d(text="tab_recrod").long_click()
-
-component: ComponentData = d(type="ListItem", index=1).find_component()
-d(type="ListItem").drag_to(component)
-
-d(text="tab_recrod").input_text("abc")
-d(text="tab_recrod").clear_text()
-d(text="tab_recrod").pinch_in()
-d(text="tab_recrod").pinch_out()
 
 # Dump hierarchy
 d.dump_hierarchy()
@@ -121,7 +128,7 @@ d.dump_hierarchy()
 # Toast Watcher
 d.toast_watcher.start()
 d(type="Button", text="tab_recrod").click()  # 触发toast的操作
-toast = d.toast_watcher.get()
+toast = d.toast_watcher.get_toast()
 
 ```
 

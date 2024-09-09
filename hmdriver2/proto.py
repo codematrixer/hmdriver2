@@ -2,7 +2,7 @@
 
 import json
 from enum import Enum
-from typing import Union, List
+from typing import Union, List, Tuple
 from dataclasses import dataclass, asdict
 
 
@@ -25,6 +25,15 @@ class DisplayRotation(Enum):
             if rotation.value == value:
                 return rotation
         raise ValueError(f"No matching DisplayRotation for value: {value}")
+
+
+class AppState:
+    INIT = 0        # 初始化状态，应用正在初始化
+    READY = 1       # 就绪状态，应用已初始化完毕
+    FOREGROUND = 2  # 前台状态，应用位于前台
+    FOCUS = 3       # 获焦状态。（预留状态，当前暂不支持）
+    BACKGROUND = 4  # 后台状态，应用位于后台
+    EXIT = 5        # 退出状态，应用已退出
 
 
 @dataclass
@@ -73,6 +82,9 @@ class Rect:
     right: int
     top: int
     bottom: int
+
+    def get_center(self) -> Tuple[int, int]:
+        return int((self.left + self.right) / 2), int((self.top + self.bottom) / 2)
 
 
 @dataclass

@@ -22,3 +22,7 @@ class HdcError(Exception):
 
 class InvokeHypiumError(Exception):
     pass
+
+
+class InjectGestureError(Exception):
+    pass
