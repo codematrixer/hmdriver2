@@ -26,3 +26,7 @@ class InvokeHypiumError(Exception):
 
 class InjectGestureError(Exception):
     pass
+
+
+class ScreenRecordError(Exception):
+    pass

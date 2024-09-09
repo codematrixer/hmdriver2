@@ -15,7 +15,6 @@ from ._client import HMClient
 from ._uiobject import UiObject
 from .hdc import list_devices
 from .exception import DeviceNotFoundError
-from ._gesture import _Gesture
 from .proto import HypiumResponse, KeyCode, Point, DisplayRotation, DeviceInfo
 
 
@@ -270,10 +269,6 @@ class Driver:
         point = self._to_abs_pos(x, y)
         self.hdc.input_text(point.x, point.y, text)
 
-    @cached_property
-    def gesture(self):
-        return _Gesture(self)
-
     def dump_hierarchy(self) -> Dict:
         """
         Dump the UI hierarchy of the device screen.
@@ -282,3 +277,14 @@ class Driver:
             Dict: The dumped UI hierarchy as a dictionary.
         """
         return self.hdc.dump_hierarchy()
+
+    @cached_property
+    def gesture(self):
+        from ._gesture import _Gesture
+        return _Gesture(self)
+
+    # @cached_property
+    # def screenrecord(self):
+    #     # FIXME
+    #     from ._screenrecord import _ScreenRecord
+    #     return _ScreenRecord(self)

@@ -4,6 +4,7 @@ import math
 from typing import List, Union
 from . import logger
 from .utils import delay
+from .driver import Driver
 from .proto import HypiumResponse, Point
 from .exception import InjectGestureError
 
@@ -13,7 +14,7 @@ class _Gesture:
     SAMPLE_TIME_NORMAL = 50
     SAMPLE_TIME_MAX = 100
 
-    def __init__(self, driver: "Driver", sampling_ms=50):  # type: ignore
+    def __init__(self, driver: Driver, sampling_ms=50):
         """
         Initialize a gesture object.
 
