@@ -52,6 +52,10 @@ def test_has_app(d):
     assert d.has_app("com.kuaishou.hmapp")
 
 
+def test_get_app_info(d):
+    assert d.get_app_info("com.kuaishou.hmapp")
+
+
 def test_go_back(d):
     d.go_back()
 

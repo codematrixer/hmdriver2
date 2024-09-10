@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import time
+import json
 import uuid
 from typing import Type, Any, Tuple, Dict, Union, List
 
@@ -10,6 +10,7 @@ try:
 except ImportError:
     from cached_property import cached_property
 
+from . import logger
 from .utils import delay
 from ._client import HMClient
 from ._uiobject import UiObject
@@ -83,6 +84,20 @@ class Driver:
 
     def has_app(self, package_name: str) -> bool:
         return self.hdc.has_app(package_name)
+
+    def get_app_info(self, package_name: str) -> Dict:
+        app_info = {}
+        data: CommandResult = self.hdc.shell(f"bm dump -n {package_name}")
+        output = data.output
+        try:
+            json_start = output.find("{")
+            json_end = output.rfind("}") + 1
+            json_output = output[json_start:json_end]
+
+            app_info = json.loads(json_output)
+        except Exception as e:
+            logger.error(f"An error occurred:{e}")
+        return app_info
 
     @cached_property
     def toast_watcher(self):

@@ -17,7 +17,7 @@ print(d.display_rotation)
 d.install_app("~/develop/harmony_prj/demo.hap")
 d.clear_app("com.samples.test.uitest")
 d.force_start_app("com.samples.test.uitest", "EntryAbility")
-
+d.get_app_info("com.samples.test.uitest")
 
 # KeyCode: https://github.com/codematrixer/hmdriver2/blob/master/hmdriver2/proto.py
 d.go_back()

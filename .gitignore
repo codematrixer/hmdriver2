@@ -24,3 +24,5 @@ logs
 .vscode*
 poetry.lock
 .pytest.cache
+_hypium_api.md
+example-dev.py

@@ -9,18 +9,25 @@
 ├── hmdriver2
 │   ├── __init__.py
 │   ├── _client.py      // 和鸿蒙uitest通信的客户端
+│   ├── _gesture.py     // 复杂手势操作封装
 │   ├── _uiobject.py    // ui控件对象, 提供操作控件和获取控件属性接口
 │   ├── asset
-│   │   └── agent.so
+│   │   └── agent.so   // 鸿蒙uitest动态链路库
 │   ├── driver.py      // ui自动化核心功能类, 提供设备点击/滑动操作, app启动停止等常用功能
 │   ├── exception.py
 │   ├── hdc.py        // hdc命令封装
-│   ├── logger.py
 │   └── proto.py
+│   └── utils.py
 ├── pyproject.toml
 ├── .flake8
-└── tests
+└── tests         // 自测用例
+    ├── __init__.py
+    ├── test_client.py
+    ├── test_driver.py
+    └── test_element.py
+
 ```
+
 
 # uitest协议
 
