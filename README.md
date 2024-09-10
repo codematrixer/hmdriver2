@@ -56,8 +56,9 @@ pip3 install -U hmdirver2
 
 # 或者这样
 python3 -m pip install -U hmdirver2
-
-# 也可以直接源码安装
+```
+也可以通过源码安装
+```
 git clone git@github.com:codematrixer/hmdriver2.git
 cd hmdriver2
 pip3 install -U -e .
@@ -595,7 +596,7 @@ toast = d.toast_watcher.get_toast()
 
 # 鸿蒙Uitest协议
 
-See [DEVELOP](/docs/DEVELOP.md)
+See [DEVELOP.md](/docs/DEVELOP.md)
 
 
 # Refer to
