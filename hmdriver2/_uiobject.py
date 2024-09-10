@@ -6,9 +6,9 @@ from typing import List, Union
 
 from . import logger
 from .utils import delay
-from ._client import HMClient
+from ._client import HmClient
 from .exception import ElementNotFoundError
-from .proto import DriverData, ComponentData, ByData, HypiumResponse, Point, Rect, ElementInfo
+from .proto import ComponentData, ByData, HypiumResponse, Point, Rect, ElementInfo
 
 
 class ByType(enum.Enum):
@@ -36,7 +36,7 @@ class ByType(enum.Enum):
 class UiObject:
     DEFAULT_TIMEOUT = 2
 
-    def __init__(self, client: HMClient, **kwargs) -> None:
+    def __init__(self, client: HmClient, **kwargs) -> None:
         self._client = client
         self._raw_kwargs = kwargs
 
@@ -46,8 +46,6 @@ class UiObject:
 
         self._kwargs = kwargs
         self.__verify()
-
-        self._hdriver: DriverData = self._client._hdriver
 
         self._component: Union[ComponentData, None] = None  # cache
 
@@ -74,12 +72,12 @@ class UiObject:
     def __set_component(self, component: ComponentData):
         self._component = component
 
-    def find_component(self, retries: int = 1, wait_time=1) -> 'UiObject':
+    def find_component(self, retries: int = 1, wait_time=1) -> ComponentData:
         for attempt in range(retries):
             components = self.__find_components()
             if components and self._index < len(components):
                 self.__set_component(components[self._index])
-                return self
+                return self._component
 
             if attempt < retries:
                 time.sleep(wait_time)
@@ -90,14 +88,14 @@ class UiObject:
     # useless
     def __find_component(self) -> Union[ComponentData, None]:
         by: ByData = self.__get_by()
-        resp: HypiumResponse = self._client.invoke("Driver.findComponent", this=self._hdriver.value, args=[by.value])
+        resp: HypiumResponse = self._client.invoke("Driver.findComponent", args=[by.value])
         if not resp.result:
             return None
         return ComponentData(resp.result)
 
     def __find_components(self) -> Union[List[ComponentData], None]:
         by: ByData = self.__get_by()
-        resp: HypiumResponse = self._client.invoke("Driver.findComponents", this=self._hdriver.value, args=[by.value])
+        resp: HypiumResponse = self._client.invoke("Driver.findComponents", args=[by.value])
         if not resp.result:
             return None
         components: List[ComponentData] = []

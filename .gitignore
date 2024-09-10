@@ -26,3 +26,4 @@ poetry.lock
 .pytest.cache
 _hypium_api.md
 example-dev.py
+test*.mp4

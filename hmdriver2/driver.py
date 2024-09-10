@@ -12,7 +12,7 @@ except ImportError:
 
 from . import logger
 from .utils import delay
-from ._client import HMClient
+from ._client import HmClient
 from ._uiobject import UiObject
 from .hdc import list_devices
 from .exception import DeviceNotFoundError
@@ -27,9 +27,10 @@ class Driver:
         if not self._is_device_online():
             raise DeviceNotFoundError(f"Device [{self.serial}] not found")
 
-        self._client = HMClient(self.serial)
-        self._this_driver = self._client._hdriver.value  # "Driver#0"
+        self._client = HmClient(self.serial)
         self.hdc = self._client.hdc
+
+        self._init_hmclient()
 
     def __new__(cls: Type[Any], serial: str) -> Any:
         """
@@ -47,12 +48,15 @@ class Driver:
         if hasattr(self, '_client') and self._client:
             self._client.release()
 
+    def _init_hmclient(self):
+        self._client.start()
+
     def _is_device_online(self):
         _serials = list_devices()
         return True if self.serial in _serials else False
 
     def _invoke(self, api: str, args: List = []) -> HypiumResponse:
-        return self._client.invoke(api, this=self._this_driver, args=args)
+        return self._client.invoke(api, this="Driver#0", args=args)
 
     @delay
     def start_app(self, package_name: str, page_name: str = "MainAbility"):
@@ -299,8 +303,17 @@ class Driver:
         from ._gesture import _Gesture
         return _Gesture(self)
 
-    # @cached_property
-    # def screenrecord(self):
-    #     # FIXME
-    #     from ._screenrecord import _ScreenRecord
-    #     return _ScreenRecord(self)
+    @cached_property
+    def screenrecord(self):
+        from ._screenrecord import RecordClient
+        return RecordClient(self.serial, self)
+
+    def invalidate_cache(self, attribute_name):
+        """
+        Invalidate the cached property.
+
+        Args:
+            attribute_name (str): The name of the attribute to invalidate.
+        """
+        if attribute_name in self.__dict__:
+            del self.__dict__[attribute_name]

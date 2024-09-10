@@ -7,13 +7,14 @@ import pytest
 # sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 # pip install -e .
 
-from hmdriver2._client import HMClient
+from hmdriver2._client import HmClient
 from hmdriver2.proto import HypiumResponse
 
 
 @pytest.fixture
 def client():
-    client = HMClient("FMR0223C13000649")
+    client = HmClient("FMR0223C13000649")
+    client.start()
     yield client
     client.release()
 

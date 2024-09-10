@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import time
 from hmdriver2.driver import Driver
 from hmdriver2.proto import DeviceInfo, KeyCode, ComponentData
 
@@ -66,6 +67,11 @@ print(toast)
 
 # Dump hierarchy
 d.dump_hierarchy()
+
+# Device Screen Recrod
+with d.screenrecord.start("test.mp4"):
+    # do somethings
+    time.sleep(5)
 
 
 # App Element

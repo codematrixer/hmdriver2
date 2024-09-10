@@ -171,3 +171,29 @@ def test_gesture(d):
 
 def test_gesture_click(d):
     d.gesture.start(0.77, 0.49).action()
+
+
+def test_screenrecord(d):
+    path = "test.mp4"
+    d.screenrecord.start(path)
+
+    d.force_start_app("com.kuaishou.hmapp", "EntryAbility")
+    time.sleep(5)
+    for _ in range(3):
+        d.swipe(0.5, 0.8, 0.5, 0.3)
+    d.go_home()
+
+    path = d.screenrecord.stop()
+    assert os.path.isfile(path)
+
+
+def test_screenrecord2(d):
+    path = "test2.mp4"
+    with d.screenrecord.start(path):
+        d.force_start_app("com.kuaishou.hmapp", "EntryAbility")
+        time.sleep(5)
+        for _ in range(3):
+            d.swipe(0.5, 0.8, 0.5, 0.3)
+    d.go_home()
+
+    assert os.path.isfile(path)

@@ -21,7 +21,7 @@
   - Key Events
   - 文件操作
   - 屏幕截图
-  - [TODO] 屏幕录屏
+  - 屏幕录屏
   - 手势操作（点击，滑动，输入，复杂手势）
 - 支持控件操作
   - 控件查找（联合查找，模糊查找，相对查找）
@@ -123,6 +123,47 @@ d.stop_app("com.kuaishou.hmapp")
 d.clear_app("com.kuaishou.hmapp")
 ```
 该方法表示清除App数据和缓存
+
+### 获取App详情
+```
+d.get_app_info("com.samples.test.uitest")
+```
+输出的数据结构是Dict, 内容如下
+```
+{
+    "appId": "com.kuaishou.hmapp_BIS88rItfUAk+V9Y4WZp2HgIZ/JeOgvEBkwgB/YyrKiwrWhje9Xn2F6Q7WKFVM22RdIR4vFsG14A7ombgQmIIxU=",
+    "appIdentifier": "5765880207853819885",
+    "applicationInfo": {
+        ...
+        "bundleName": "com.kuaishou.hmapp",
+        "codePath": "/data/app/el1/bundle/public/com.kuaishou.hmapp",
+        "compileSdkType": "HarmonyOS",
+        "compileSdkVersion": "4.1.0.73",
+        "cpuAbi": "arm64-v8a",
+        "deviceId": "PHONE-001",
+				...
+        "vendor": "快手",
+        "versionCode": 999999,
+        "versionName": "12.2.40"
+    },
+    "compatibleVersion": 40100011,
+    "cpuAbi": "",
+    "hapModuleInfos": [
+        ...
+    ],
+    "reqPermissions": [
+        "ohos.permission.ACCELEROMETER",
+        "ohos.permission.GET_NETWORK_INFO",
+        "ohos.permission.GET_WIFI_INFO",
+        "ohos.permission.INTERNET",
+        ...
+    ],
+		...
+    "vendor": "快手",
+    "versionCode": 999999,
+    "versionName": "12.2.40"
+}
+```
 
 
 ## 设备操作
@@ -242,6 +283,27 @@ d.screenshot(path)
 ```
 参数`path`表示截图保存在本地电脑的文件路径
 
+### 屏幕录屏
+方式一
+```
+# 开启录屏
+d.screenrecord.start("test.mp4")
+
+# do somethings
+time.sleep(5)
+
+# 结束录屏
+d.screenrecord.stop()
+```
+这种方式会有一个问题：当录屏过程中，脚本出现异常时`stop`无法被调用，导致资源泄漏（当然也可以用try catch）
+
+【推荐】方式二  ⭐️⭐️⭐️⭐️⭐️
+```
+with d.screenrecord.start("test2.mp4"):
+    # do somethings
+    time.sleep(5)
+```
+通过上下文语法，在录屏结束时框架会自动调用`stop` 清理资源
 
 ### Device Touch
 #### 单击
@@ -310,7 +372,7 @@ d.gesture.start(x, y, interval=.5).move(x, y).pause(interval=1).move(x, y).actio
 参数`x`, `y`表示坐标位置，可以为绝对坐标值，也可以为相当坐标（屏幕百分比），`interval`表示手势持续的时间，单位秒
 
 
-这是一个复杂手势的效果展示 [Watch the video](/docs/demo_gesture.mp4)
+这是一个复杂手势的效果展示 [Watch the gif](/docs/demo_gesture.gif)
 
 
 Notes：如果只有start手势，则等价于点击

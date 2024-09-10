@@ -128,7 +128,7 @@ class _Gesture:
             pointer_matrix (PointerMatrix): Pointer matrix to inject.
         """
         api = "Driver.injectMultiPointerAction"
-        self.driver._client.invoke(api, this=self.driver._this_driver, args=[pointer_matrix, 2000])
+        self.driver._client.invoke(api, args=[pointer_matrix, 2000])
 
     def _add_step(self, x: int, y: int, step_type: str, interval: float):
         """

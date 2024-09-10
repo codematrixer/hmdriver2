@@ -20,15 +20,11 @@ UITEST_SERVICE_PORT = 8012
 SOCKET_TIMEOUT = 30
 
 
-class HMClient:
+class HmClient:
     """harmony uitest client"""
     def __init__(self, serial: str):
         self.hdc = HdcWrapper(serial)
         self.sock = None
-
-        self.start()
-
-        self._hdriver: DriverData = self._create_hdriver()
 
     @cached_property
     def local_port(self):
@@ -67,12 +63,13 @@ class HMClient:
         logger.debug(f"sendMsg: {msg}")
         self.sock.sendall(msg.encode('utf-8') + b'\n')
 
-    def _recv_msg(self, buff_size: int = 1024, decode=False) -> typing.Union[bytearray, str]:
+    def _recv_msg(self, buff_size: int = 1024, decode=False, print=True) -> typing.Union[bytearray, str]:
         try:
             relay = self.sock.recv(buff_size)
             if decode:
                 relay = relay.decode()
-            logger.debug(f"recvMsg: {relay}")
+            if print:
+                logger.debug(f"recvMsg: {relay}")
             return relay
         except (socket.timeout, UnicodeDecodeError) as e:
             logger.warning(e)
@@ -114,14 +111,16 @@ class HMClient:
         return data
 
     def start(self):
-        logger.info("Start client connection")
+        logger.info("Start HmClient connection")
         self._init_so_resource()
         self._restart_uitest_service()
 
         self._connect_sock()
 
+        self._create_hdriver()
+
     def release(self):
-        logger.info("Release client connection")
+        logger.info(f"Release {self.__class__.__name__} connection")
         try:
             if self.sock:
                 self.sock.close()
