@@ -10,6 +10,9 @@ include = ["*/asset/*"]
 [tool.poetry.dependencies]
 python = "^3.8"
 
+[tool.poetry.extras]
+opencv-python = ["opencv-python-headless"]
+
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.2"
 

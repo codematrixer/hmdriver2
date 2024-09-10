@@ -50,22 +50,20 @@ export HDC_SERVER_PORT=7035
 2. 电脑插上手机，开启USB调试，确保执行`hdc list targets` 可以看到设备序列号
 
 
-3. 安装`hmdirver2` 库
+3. 安装`hmdirver2` 基础库
+```bash
+pip3 install -U hmdriver
 ```
-pip3 install -U hmdirver2
+如果需要使用[屏幕录屏](#屏幕录屏) 功能，则需要安装额外依赖`opencv-python`
+```bash
+pip3 install -U "hmdriver[opencv-python]"
 
-# 或者这样
-python3 -m pip install -U hmdirver2
+# 由于`opencv-python`比较大，因此没有写入到主依赖中，按需安装
 ```
-也可以通过源码安装
-```
-git clone git@github.com:codematrixer/hmdriver2.git
-cd hmdriver2
-pip3 install -U -e .
-```
+
 
 4. 接下来就可以愉快的进行脚本开发了 😊😊
-```
+```python3
 from hmdriver2.driver import Driver
 
 d = Driver("FMR0223C13000649")
@@ -84,7 +82,7 @@ DeviceInfo(productName='HUAWEI Mate 60 Pro', model='ALN-AL00', sdkVersion='12', 
 # API Documents
 
 ## 初始化Driver
-```
+```python3
 from hmdriver2.driver import Driver
 
 d = Driver("FMR0223C13000649")
@@ -95,42 +93,42 @@ d = Driver("FMR0223C13000649")
 
 ## App管理
 ### 安装App
-```
+```python3
 d.install_app("/Users/develop/harmony_prj/demo.hap")
 ```
 
 ### 卸载App
-```
+```python3
 d.uninstall_app("com.kuaishou.hmapp")
 ```
 传入的参数是`package_name`，可通过hdc命令获取`hdc shell bm dump -a`
 
 ### 启动App
 
-```
+```python3
 d.start_app("com.kuaishou.hmapp", "EntryAbility")
 ```
 传入的两个参数分别是`package_name`, `page_name`,可以通过hdc命令获取`hdc shell aa dump -l`
 
 
 ### 停止App
-```
+```python3
 d.stop_app("com.kuaishou.hmapp")
 ```
 
 
 ### 清除App数据
-```
+```python3
 d.clear_app("com.kuaishou.hmapp")
 ```
 该方法表示清除App数据和缓存
 
 ### 获取App详情
-```
+```python3
 d.get_app_info("com.samples.test.uitest")
 ```
 输出的数据结构是Dict, 内容如下
-```
+```bash
 {
     "appId": "com.kuaishou.hmapp_BIS88rItfUAk+V9Y4WZp2HgIZ/JeOgvEBkwgB/YyrKiwrWhje9Xn2F6Q7WKFVM22RdIR4vFsG14A7ombgQmIIxU=",
     "appIdentifier": "5765880207853819885",
@@ -169,17 +167,17 @@ d.get_app_info("com.samples.test.uitest")
 
 ## 设备操作
 ### 获取设备信息
-```
+```python3
 from hmdriver2.proto import DeviceInfo
 
 info: DeviceInfo = d.device_info
 ```
 输入内容如下
-```
+```bash
 DeviceInfo(productName='HUAWEI Mate 60 Pro', model='ALN-AL00', sdkVersion='12', sysVersion='ALN-AL00 5.0.0.60(SP12DEVC00E61R4P9log)', cpuAbi='arm64-v8a', wlanIp='172.31.125.111', displaySize=(1260, 2720), displayRotation=<DisplayRotation.ROTATION_0: 0>)
 ```
 然后就可以获取你想要的值, 比如
-```
+```python3
 info.productName
 info.model
 info.wlanIp
@@ -191,21 +189,21 @@ info.displayRotation
 ```
 
 ### 获取设备分辨率
-```
+```python3
 w, h = d.display_size
 
 # outout: (1260, 2720)
 ```
 
 ### 获取设备旋转状态
-```
+```python3
 from hmdriver2.proto import DisplayRotation
 
 rotation = d.display_rotation
 # ouput: DisplayRotation.ROTATION_0
 ```
 设备旋转状态包括：
-```
+```python3
 ROTATION_0 = 0    # 未旋转
 ROTATION_90 = 1  # 顺时针旋转90度
 ROTATION_180 = 2  # 顺时针旋转180度
@@ -215,30 +213,30 @@ ROTATION_270 = 3  # 顺时针旋转270度
 
 
 ### Home
-```
+```python3
 d.go_home()
 ```
 ### 返回
-```
+```python3
 d.go_back()
 ```
 ### 亮屏
-```
+```python3
 d.screen_on()
 ```
 
 ### 息屏
-```
+```python3
 d.screen_off()
 ```
 
 ### 屏幕解锁
-```
+```python3
 d.unlock()
 ```
 
 ### Key Events
-```
+```python3
 from hmdriver2.proto import KeyCode
 
 d.press_key(KeyCode.POWER)
@@ -258,7 +256,7 @@ Notes: `HDC`详细的命令解释参考：[awesome-hdc](https://github.com/codem
 
 
 ### 打开URL (schema)
-```
+```python3
 d.open_url("http://www.baidu.com")
 
 d.open_url("kwai://myprofile")
@@ -267,7 +265,7 @@ d.open_url("kwai://myprofile")
 
 
 ### 文件操作
-```
+```python3
 # 将本地电脑文件推送到手机端
 d.pull_file(rpath, lpath)
 
@@ -278,7 +276,7 @@ d.push_file(lpath, rpath)
 
 
 ### 屏幕截图
-```
+```python3
 d.screenshot(path)
 
 ```
@@ -286,7 +284,7 @@ d.screenshot(path)
 
 ### 屏幕录屏
 方式一
-```
+```python3
 # 开启录屏
 d.screenrecord.start("test.mp4")
 
@@ -296,19 +294,24 @@ time.sleep(5)
 # 结束录屏
 d.screenrecord.stop()
 ```
-这种方式会有一个问题：当录屏过程中，脚本出现异常时`stop`无法被调用，导致资源泄漏（当然也可以用try catch）
+上述方式如果录屏过程中，脚本出现异常时，`stop`无法被调用，导致资源泄漏，需要加上try catch
 
 【推荐】方式二  ⭐️⭐️⭐️⭐️⭐️
-```
+```python3
 with d.screenrecord.start("test2.mp4"):
     # do somethings
     time.sleep(5)
 ```
 通过上下文语法，在录屏结束时框架会自动调用`stop` 清理资源
 
+Notes: 使用屏幕录屏需要依赖`opencv-python`
+```bash
+pip3 install -U "hmdriver[opencv-python]"
+```
+
 ### Device Touch
 #### 单击
-```
+```python3
 d.click(x, y)
 
 # eg.
@@ -318,7 +321,7 @@ d.click(0.4, 0.6)
 参数`x`, `y`表示点击的坐标，可以为绝对坐标值，也可以为相当坐标（屏幕百分比）
 
 #### 双击
-```
+```python3
 d.double_click(x, y)
 
 # eg.
@@ -326,7 +329,7 @@ d.double_click(500, 1000)
 d.double_click(0.5, 0.4)
 ```
 #### 长按
-```
+```python3
 d.long_click(x, y)
 
 # eg.
@@ -334,7 +337,7 @@ d.long_click(500, 1000)
 d.long_click(0.5, 0.4)
 ```
 #### 滑动
-```
+```python3
 d.swipe(x1, y1, x2, y2, spped)
 
 # eg.
@@ -344,7 +347,7 @@ d.swipe(0.5, 0.8, 0.5, 0.4, speed=2000)
 参数`x1`, `y1`表示滑动的起始点，`x2`, `y2`表示滑动的终点，`speed`为滑动速率, 范围:200~40000, 不在范围内设为默认值为600, 单位: 像素点/秒
 
 #### 输入
-```
+```python3
 d.input_text(x, y, text)
 
 # eg.
@@ -356,7 +359,7 @@ d.input_text(0.3, 0.5, "adbcdfg")
 #### 复杂手势
 复杂手势就是手指按下`start`，移动`move`，暂停`pause`的集合，最后运行`action`
 
-```
+```python3
 g = d.gesture
 
 g.start(x1, y1, interval=0.5)
@@ -366,7 +369,7 @@ g.move(x3, y3)
 g.action()
 ```
 也支持链式调用（推荐）
-```
+```python3
 d.gesture.start(x, y, interval=.5).move(x, y).pause(interval=1).move(x, y).action()
 ```
 
@@ -377,7 +380,7 @@ d.gesture.start(x, y, interval=.5).move(x, y).pause(interval=1).move(x, y).actio
 
 
 Notes：如果只有start手势，则等价于点击
-```
+```python3
 d.gesture.start(x, y).action() # click
 
 # 等价于
@@ -408,7 +411,7 @@ d.click(x, y)
 
 
 **普通定位**
-```
+```python3
 d(text="tab_recrod")
 
 d(id="drag")
@@ -422,13 +425,13 @@ Notes：当同一界面有多个属性相同的元素时，`index`属性非常�
 
 **组合定位**
 指定多个`by`属性进行元素定位
-```
+```python3
 # 定位`type`为Button且`text`为tab_recrod的元素
 d(type="Button", text="tab_recrod")
 ```
 
 **相对定位**
-```
+```python3
 # 定位`text`为showToast的元素的前面一个元素
 d(text="showToast", isAfter=True) 
 
@@ -438,7 +441,7 @@ d(id="drag", isBefore=True)
 
 ### 控件查找
 结合上面讲的元素选择器，就可以进行元素的查找
-```
+```python3
 d(text="tab_recrod").exists()
 d(type="Button", text="tab_recrod").exists()
 d(text="tab_recrod", isAfter=True).exists()
@@ -451,7 +454,7 @@ d(text="tab_recrod").find_component()
 
 ### 控件信息
 
-```
+```python3
 d(text="tab_recrod").info
 
 # output:
@@ -483,7 +486,7 @@ d(text="tab_recrod").info
 ```
 也可以单独调用对应的属性
 
-```
+```python3
 d(text="tab_recrod").id
 d(text="tab_recrod").key
 d(text="tab_recrod").type
@@ -503,7 +506,7 @@ d(text="tab_recrod").boundsCenter
 
 
 ### 控件数量
-```
+```python3
 d(type="Button").count   # 输出当前页面`type`为Button的元素数量
 
 # 也可以这样写
@@ -512,7 +515,7 @@ len(d(type="Button"))
 
 
 ### 控件点击
-```
+```python3
 d(text="tab_recrod").click()
 d(type="Button", text="tab_recrod").click()
 
@@ -524,20 +527,20 @@ d(text="tab_recrod").click_if_exists()
 - `click_if_exists` 即使元素没有找到，也不会报错，相当于跳过
 
 ### 控件双击
-```
+```python3
 d(text="tab_recrod").double_click()
 d(type="Button", text="tab_recrod").double_click()
 ```
 
 ### 控件长按
-```
+```python3
 d(text="tab_recrod").long_click()
 d(type="Button", text="tab_recrod").long_click()
 ```
 
 
 ### 控件拖拽
-```
+```python3
 from hmdriver2.proto import ComponentData
 
 componentB: ComponentData = d(type="ListItem", index=1).find_component()
@@ -549,7 +552,7 @@ d(type="ListItem").drag_to(componentB)
 `drag_to`的参数`component`为`ComponentData`类型
 
 ### 控件缩放
-```
+```python3
 # 将元素按指定的比例进行捏合缩小1倍
 d(text="tab_recrod").pinch_in(scale=0.5)
 
@@ -560,25 +563,25 @@ d(text="tab_recrod").pinch_out(scale=2)
 
 
 ### 控件输入
-```
+```python3
 d(text="tab_recrod").input_text("abc")
 ```
 
 ### 文本清除
-```
+```python3
 d(text="tab_recrod").clear_text()
 ```
 
 
 ## 获取控件树
-```
+```python3
 d.dump_hierarchy()
 ```
 输出控件树格式参考 [hierarchy.json](/docs/hierarchy.json)
 
 
 ## 获取Toast
-```
+```python3
 # 启动toast监控
 d.toast_watcher.start()
 
@@ -590,7 +593,6 @@ toast = d.toast_watcher.get_toast()
 
 # output: 'testMessage'
 ```
-
 
 
 
