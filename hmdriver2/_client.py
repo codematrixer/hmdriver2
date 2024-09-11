@@ -144,7 +144,7 @@ class HmClient:
 
         def __get_so_local_path() -> str:
             current_path = os.path.realpath(__file__)
-            return os.path.join(os.path.dirname(current_path), "asset", "agent.so")
+            return os.path.join(os.path.dirname(current_path), "assets", "agent.so")
 
         def __check_device_so_file_exists() -> bool:
             """Check if the agent.so file exists on the device."""

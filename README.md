@@ -1,4 +1,10 @@
 # hmdriver2
+[![github actions](https://github.com/codematrixer/hmdriver2/actions/workflows/release.yml/badge.svg)](https://github.com/codematrixer/hmdriver2/actions)
+[![pypi version](https://img.shields.io/pypi/v/hmdriver2.svg)](https://pypi.python.org/pypi/hmdriver2)
+![python](https://img.shields.io/pypi/pyversions/hmdriver2.svg)
+[![downloads](https://pepy.tech/badge/hmdriver2)](https://pepy.tech/project/hmdriver2)
+
+
 
 >写这个项目前github上已有个[hmdirver](https://github.com/mrx1203/hmdriver)，但它是侵入式（需要提前在手机端安装一个testRunner app）。另外鸿蒙官方提供的`hypium`自动化框架，使用较复杂，依赖繁杂。于是决定重写一套框架，解决上述两个框架的弊端。
 
@@ -32,6 +38,7 @@
 - 支持Toast获取
 - [TODO] 全场景弹窗处理
 - [TODO] 操作标记
+- [TODO] Inspector
 
 
 
@@ -66,13 +73,12 @@ pip3 install -U "hmdriver[opencv-python]"
 ```python3
 from hmdriver2.driver import Driver
 
-d = Driver("FMR0223C13000649")
+d = Driver("FMR0223C13000649")  # 参数替换成你的serial
 
 print(d.device_info)
 
 # ouput:
-DeviceInfo(productName='HUAWEI Mate 60 Pro', model='ALN-AL00', sdkVersion='12', sysVersion='ALN-AL00 5.0.0.60(SP12DEVC00E61R4P9log)', cpuAbi='arm64-v8a', wlanIp='172.31.125.111', displaySize=(1260, 2720), displayRotation=<DisplayRotation.ROTATION_0: 0>)
-
+# DeviceInfo(productName='HUAWEI Mate 60 Pro', model='ALN-AL00', sdkVersion='12', sysVersion='ALN-AL00 5.0.0.60(SP12DEVC00E61R4P9log)', cpuAbi='arm64-v8a', wlanIp='172.31.125.111', displaySize=(1260, 2720), displayRotation=<DisplayRotation.ROTATION_0: 0>)
 ```
 
 
@@ -88,6 +94,7 @@ from hmdriver2.driver import Driver
 d = Driver("FMR0223C13000649")
 ```
 
+参数`serial` 通过`hdc list targets` 命令获取
 
 初始化driver后，下面所有的操作都是调用dirver实现
 
@@ -108,7 +115,7 @@ d.uninstall_app("com.kuaishou.hmapp")
 ```python3
 d.start_app("com.kuaishou.hmapp", "EntryAbility")
 ```
-传入的两个参数分别是`package_name`, `page_name`,可以通过hdc命令获取`hdc shell aa dump -l`
+传入的两个参数分别是`package_name`, `page_name`，可以通过hdc命令获取`hdc shell aa dump -l`
 
 
 ### 停止App
@@ -370,16 +377,12 @@ g.action()
 ```
 也支持链式调用（推荐）
 ```python3
-d.gesture.start(x, y, interval=.5).move(x, y).pause(interval=1).move(x, y).action()
+d.gesture.start(x1, y1, interval=.5).move(x2, y2).pause(interval=1).move(x3, y3).action()
 ```
 
-参数`x`, `y`表示坐标位置，可以为绝对坐标值，也可以为相当坐标（屏幕百分比），`interval`表示手势持续的时间，单位秒
+参数`x`, `y`表示坐标位置，可以为绝对坐标值，也可以为相当坐标（屏幕百分比），`interval`表示手势持续的时间，单位秒。
 
-
-这是一个复杂手势的效果展示 [Watch the gif](/docs/demo_gesture.gif)
-
-
-Notes：如果只有start手势，则等价于点击
+如果只有start手势，则等价于点击：
 ```python3
 d.gesture.start(x, y).action() # click
 
@@ -387,6 +390,9 @@ d.gesture.start(x, y).action() # click
 d.click(x, y)
 ```
 
+*如下是一个复杂手势的效果展示*
+
+![Watch the gif](./docs/gesture.gif)
 
 
 ## 控件操作
@@ -424,6 +430,7 @@ Notes：当同一界面有多个属性相同的元素时，`index`属性非常�
 **模糊定位TODO**
 
 **组合定位**
+
 指定多个`by`属性进行元素定位
 ```python3
 # 定位`type`为Button且`text`为tab_recrod的元素
@@ -440,7 +447,7 @@ d(id="drag", isBefore=True)
 ``` 
 
 ### 控件查找
-结合上面讲的元素选择器，就可以进行元素的查找
+结合上面讲的控件选择器，就可以进行元素的查找
 ```python3
 d(text="tab_recrod").exists()
 d(type="Button", text="tab_recrod").exists()
