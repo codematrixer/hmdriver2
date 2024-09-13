@@ -3,12 +3,7 @@
 import json
 import uuid
 from typing import Type, Any, Tuple, Dict, Union, List
-
-try:
-    # Python3.8+
-    from functools import cached_property
-except ImportError:
-    from cached_property import cached_property
+from functools import cached_property  # python3.8+
 
 from . import logger
 from .utils import delay
@@ -146,7 +141,7 @@ class Driver:
     def unlock(self):
         self.screen_on()
         w, h = self.display_size
-        self.hdc.swipe(0.5 * w, 0.8 * h, 0.5 * w, 0.2 * h, speed=600)
+        self.swipe(0.5 * w, 0.8 * h, 0.5 * w, 0.2 * h, speed=6000)
 
     @cached_property
     def display_size(self) -> Tuple[int, int]:
@@ -268,7 +263,7 @@ class Driver:
         self._invoke(api, args=[point.x, point.y])
 
     @delay
-    def swipe(self, x1, y1, x2, y2, speed=1000):
+    def swipe(self, x1, y1, x2, y2, speed=2000):
         """
         Perform a swipe action on the device screen.
 
@@ -277,12 +272,18 @@ class Driver:
             y1 (float): The start Y coordinate as a percentage or absolute value.
             x2 (float): The end X coordinate as a percentage or absolute value.
             y2 (float): The end Y coordinate as a percentage or absolute value.
-            speed (int, optional): The swipe speed in pixels per second. Default is 1000. Range: 200-40000. If not within the range, set to default value of 600.
+            speed (int, optional): The swipe speed in pixels per second. Default is 2000. Range: 200-40000. If not within the range, set to default value of 2000.
         """
+
         point1 = self._to_abs_pos(x1, y1)
         point2 = self._to_abs_pos(x2, y2)
 
-        self.hdc.swipe(point1.x, point1.y, point2.x, point2.y, speed=speed)
+        if speed < 200 or speed > 40000:
+            logger.warning("`speed` is not in the range[200-40000], Set to default value of 2000.")
+            speed = 2000
+
+        api = "Driver.swipe"
+        self._invoke(api, args=[point1.x, point1.y, point2.x, point2.y, speed])
 
     @delay
     def input_text(self, x, y, text: str):

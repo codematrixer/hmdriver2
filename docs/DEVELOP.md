@@ -132,6 +132,16 @@
 {"result":null}
 ```
 
+### swipe
+**send**
+```
+{"module":"com.ohos.devicetest.hypiumApiHelper","method":"callHypiumApi","params":{"api":"Driver.swipe","this":"Driver#0","args":[630,2176,630,1360,7344],"message_type":"hypium"},"request_id":"20240913123029322117","client":"127.0.0.1"}
+```
+**recv**
+```
+{"result":null}
+```
+
 
 ### findComponents
 **send**

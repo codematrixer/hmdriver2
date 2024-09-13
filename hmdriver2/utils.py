@@ -11,7 +11,7 @@ def delay(func):
     After each UI operation, it is necessary to wait for a while to ensure the stability of the UI,
     so as not to affect the next UI operation.
     """
-    DELAY_TIME = 0.4
+    DELAY_TIME = 0.5
 
     @wraps(func)
     def wrapper(*args, **kwargs):

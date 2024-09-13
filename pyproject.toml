@@ -5,7 +5,7 @@ description = "UI Automation Framework for Harmony Next"
 authors = ["codematrixer <chenli_gogo@163.com>"]
 license = "MIT"
 readme = "README.md"
-include = ["*/asset/*"]
+include = ["*/assets/*"]
 
 [tool.poetry.dependencies]
 python = "^3.8"

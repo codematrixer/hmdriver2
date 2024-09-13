@@ -5,14 +5,14 @@
 [![downloads](https://pepy.tech/badge/hmdriver2)](https://pepy.tech/project/hmdriver2)
 
 
+>写这个项目前github上已有个[hmdirver](https://github.com/mrx1203/hmdriver)，但它是侵入式（需要提前在手机端安装一个testRunner app）。另外鸿蒙官方提供的hypium自动化框架，使用较为复杂，依赖繁杂。于是决定重写一套。
 
->写这个项目前github上已有个[hmdirver](https://github.com/mrx1203/hmdriver)，但它是侵入式（需要提前在手机端安装一个testRunner app）。另外鸿蒙官方提供的`hypium`自动化框架，使用较复杂，依赖繁杂。于是决定重写一套框架，解决上述两个框架的弊端。
 
 `hmdriver2`是一款支持`鸿蒙Next`系统的UI自动化框架，**无侵入式**，提供应用管理，UI操作，元素定位等功能，轻量高效，上手简单，快速实现鸿蒙应用自动化测试需求。
 
 
 # Feature
-- 支持鸿蒙Next系统的自动化
+- 支持鸿蒙Next系统的UI自动化测试
 - **无侵入式**，无需在手机安装基于ArkTS的testRunner APP
 - 稳定高效，直接和鸿蒙底层uitest服务交互
 - 轻量，上手简单，即插即用
@@ -351,7 +351,7 @@ d.swipe(x1, y1, x2, y2, spped)
 d.swipe(600, 2600, 600, 1200, speed=2000)  # 上滑
 d.swipe(0.5, 0.8, 0.5, 0.4, speed=2000)
 ```
-参数`x1`, `y1`表示滑动的起始点，`x2`, `y2`表示滑动的终点，`speed`为滑动速率, 范围:200~40000, 不在范围内设为默认值为600, 单位: 像素点/秒
+参数`x1`, `y1`表示滑动的起始点，`x2`, `y2`表示滑动的终点，`speed`为滑动速率, 范围:200~40000, 不在范围内设为默认值为2000, 单位: 像素点/秒
 
 #### 输入
 ```python3
