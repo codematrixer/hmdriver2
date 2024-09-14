@@ -106,8 +106,8 @@ class HdcWrapper:
         return [item.strip() for item in raw]
 
     def has_app(self, package_name: str) -> bool:
-        data = self.shell(f"bm dump -a | grep {package_name}").output
-        return True if data else False
+        data = self.shell("bm dump -a").output
+        return True if package_name in data else False
 
     def start_app(self, package_name: str, ability_name: str):
         return self.shell(f"aa start -a {ability_name} -b {package_name}")
@@ -169,9 +169,6 @@ class HdcWrapper:
             raise HdcError("Invalid HDC keycode")
 
         self.shell(f"uitest uiInput keyEvent {key_code}")
-
-    def hide_keyboard(self):
-        self.shell("uinput -K -d 2 -i 2 -u 2")
 
     def tap(self, x: int, y: int) -> None:
         self.shell(f"uitest uiInput click {x} {y}")

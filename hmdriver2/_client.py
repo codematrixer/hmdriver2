@@ -154,9 +154,9 @@ class HmClient:
 
         def __get_remote_md5sum() -> str:
             """Get the MD5 checksum of the file on the device."""
-            command = "md5sum /data/local/tmp/agent.so | awk '{ print $1 }'"
-            result = self.hdc.shell(command).output.strip()
-            return result
+            command = "md5sum /data/local/tmp/agent.so"
+            data = self.hdc.shell(command).output.strip()
+            return data.split()[0]
 
         def __get_local_md5sum(f: str) -> str:
             """Calculate the MD5 checksum of a local file."""
@@ -183,10 +183,11 @@ class HmClient:
         shell        44416     1 2 11:03:42 ?     00:00:01 uitest start-daemon com.hmtest.uitest@4x9@1"
         """
         try:
-            # pids: list = self.hdc.shell("pidof uitest").output.strip().split()
-            result = self.hdc.shell("ps -ef | grep uitest | grep singleness").output.strip()
+            result = self.hdc.shell("ps -ef").output.strip()
             lines = result.splitlines()
-            for line in lines:
+            filtered_lines = [line for line in lines if 'uitest' in line and 'singleness' in line]
+
+            for line in filtered_lines:
                 if 'uitest start-daemon singleness' in line:
                     parts = line.split()
                     pid = parts[1]
