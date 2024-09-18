@@ -73,7 +73,7 @@ pip3 install -U "hmdriver[opencv-python]"
 ```python3
 from hmdriver2.driver import Driver
 
-d = Driver("FMR0223C13000649")  # 参数替换成你的serial
+d = Driver("FMR0223C13000649")  # 替换成你的serial
 
 print(d.device_info)
 
@@ -132,7 +132,7 @@ d.clear_app("com.kuaishou.hmapp")
 
 ### 获取App详情
 ```python3
-d.get_app_info("com.samples.test.uitest")
+d.get_app_info("com.kuaishou.hmapp")
 ```
 输出的数据结构是Dict, 内容如下
 ```bash
@@ -273,10 +273,10 @@ d.open_url("kwai://myprofile")
 
 ### 文件操作
 ```python3
-# 将本地电脑文件推送到手机端
+# 将手机端文件下载到本地电脑
 d.pull_file(rpath, lpath)
 
-# 将手机端文件下载到本地电脑
+# 将本地电脑文件推送到手机端
 d.push_file(lpath, rpath)
 ```
 参数`rpath`表示手机端文件路径，`lpath`表示本地电脑文件路径

@@ -10,10 +10,10 @@ d = Driver("FMR0223C13000649")
 
 # Device Info
 info: DeviceInfo = d.device_info
-# DeviceInfo(productName='HUAWEI Mate 60 Pro', model='ALN-AL00', sdkVersion='12', sysVersion='ALN-AL00 5.0.0.60(SP12DEVC00E61R4P9log)', cpuAbi='arm64-v8a', wlanIp='172.31.125.111', displaySize=(1260, 2720), displayRotation=<DisplayRotation.ROTATION_0: 0>)
+# output: DeviceInfo(productName='HUAWEI Mate 60 Pro', model='ALN-AL00', sdkVersion='12', sysVersion='ALN-AL00 5.0.0.60(SP12DEVC00E61R4P9log)', cpuAbi='arm64-v8a', wlanIp='172.31.125.111', displaySize=(1260, 2720), displayRotation=<DisplayRotation.ROTATION_0: 0>)
 
-print(d.display_size)
-print(d.display_rotation)
+d.display_size
+d.display_rotation
 
 d.install_app("~/develop/harmony_prj/demo.hap")
 d.clear_app("com.samples.test.uitest")
@@ -21,23 +21,24 @@ d.force_start_app("com.samples.test.uitest", "EntryAbility")
 d.get_app_info("com.samples.test.uitest")
 
 # KeyCode: https://github.com/codematrixer/hmdriver2/blob/master/hmdriver2/proto.py
+d.press_key(KeyCode.POWER)
+
 d.go_back()
 d.go_home()
-d.press_key(KeyCode.POWER)
 d.screen_on()
 d.screen_off()
 d.unlock()
 
 # Execute HDC shell command
-d.shell("ls -l")
+d.shell("bm dump -n com.kuaishou.hmapp")
 
 # Open scheme
 d.open_url("http://www.baidu.com")
 
 # Push and pull files
-rpath = "/data/local/tmp/agent.so"
-lpath = "./agent.so"
-d.pull_file("", lpath)
+rpath = "/data/local/tmp/test.png"
+lpath = "./test.png"
+d.pull_file(rpath, lpath)
 d.push_file(lpath, rpath)
 
 # Device Screenshot
@@ -55,7 +56,6 @@ d.input_text(0.5, 0.5, "adbcdfg")
 
 # Device touch gersture
 d.gesture.start(630, 984, interval=.5).move(0.2, 0.4, interval=.5).pause(interval=1).move(0.5, 0.6, interval=.5).pause(interval=1).action()
-d.go_back()
 d.gesture.start(0.77, 0.49).action()
 
 
@@ -93,6 +93,7 @@ d(text="tab_recrod").pinch_out()
 
 d(text="tab_recrod").info
 """
+output:
 {
     "id": "",
     "key": "",
