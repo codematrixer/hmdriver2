@@ -177,8 +177,13 @@ class Driver:
         )
 
     @delay
-    def open_url(self, url: str):
-        self.hdc.shell(f"aa start -U {url}")
+    def open_url(self, url: str, system_browser: bool = None):
+        if system_browser is True:
+            # Use the system browser
+            self.hdc.shell(f"aa start -A ohos.want.action.viewData -e entity.system.browsable -U {url}")
+        else:
+            # Default method
+            self.hdc.shell(f"aa start -U {url}")
 
     def pull_file(self, rpath: str, lpath: str):
         """
