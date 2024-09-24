@@ -65,19 +65,39 @@ class HmClient:
 
     def _recv_msg(self, buff_size: int = 1024, decode=False, print=True) -> typing.Union[bytearray, str]:
         try:
-            relay = self.sock.recv(buff_size)
-            if decode:
-                relay = relay.decode()
-            if print:
-                logger.debug(f"recvMsg: {relay}")
-            return relay
+            full_message = bytearray()
+            while True:
+                relay = self.sock.recv(buff_size)
+                if not relay:
+                    break
+
+                full_message.extend(relay)
+
+                if decode:
+                    try:
+                        decoded_message = full_message.decode()
+                        # Validate if it's a complete JSON
+                        json.loads(decoded_message)
+                        if print:
+                            logger.debug(f"recvMsg (complete JSON): {decoded_message}")
+                        return decoded_message
+                    except (UnicodeDecodeError, json.JSONDecodeError):
+                        # Incomplete JSON, continue receiving
+                        continue
+                else:
+                    if print:
+                        logger.debug(f"recvMsg (partial): {full_message}")
+
+            # If decode is False, return the full message as bytearray
+            return full_message
+
         except (socket.timeout, UnicodeDecodeError) as e:
             logger.warning(e)
             if decode:
                 return ''
             return bytearray()
 
-    def invoke(self, api: str, this: str = "Driver#0", args: typing.List = []) -> HypiumResponse:
+    def invoke(self, api: str, this: str = "Driver#0", args: typing.List = [], method: str = None) -> HypiumResponse:
         """
         Invokes a given API method with the specified arguments and handles exceptions.
 
@@ -92,17 +112,30 @@ class HmClient:
         InvokeHypiumError: If the API call returns an exception in the response.
         """
 
-        msg = {
-            "module": "com.ohos.devicetest.hypiumApiHelper",
-            "method": "callHypiumApi",
-            "params": {
+        request_id = datetime.now().strftime("%Y%m%d%H%M%S%f")
+
+        if method is None:
+            # When method is None, include 'this' in params
+            params = {
                 "api": api,
                 "this": this,
                 "args": args,
                 "message_type": "hypium"
-            },
-            "request_id": datetime.now().strftime("%Y%m%d%H%M%S%f")
+            }
+        else:
+            # When method is specified, 'this' is not needed in params
+            params = {
+                "api": api,
+                "args": args
+            }
+
+        msg = {
+            "module": "com.ohos.devicetest.hypiumApiHelper",
+            "method": method if method else "callHypiumApi",
+            "params": params,
+            "request_id": request_id
         }
+
         self._send_msg(msg)
         raw_data = self._recv_msg(decode=True)
         data = HypiumResponse(**(json.loads(raw_data)))

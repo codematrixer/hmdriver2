@@ -50,8 +50,8 @@ class Driver:
         _serials = list_devices()
         return True if self.serial in _serials else False
 
-    def _invoke(self, api: str, args: List = []) -> HypiumResponse:
-        return self._client.invoke(api, this="Driver#0", args=args)
+    def _invoke(self, api: str, args: List = [], method: str = None) -> HypiumResponse:
+        return self._client.invoke(api, this="Driver#0", args=args, method=method)
 
     @delay
     def start_app(self, package_name: str, page_name: str = "MainAbility"):
@@ -291,18 +291,22 @@ class Driver:
         self._invoke(api, args=[point1.x, point1.y, point2.x, point2.y, speed])
 
     @delay
-    def input_text(self, x, y, text: str):
-        point = self._to_abs_pos(x, y)
-        self.hdc.input_text(point.x, point.y, text)
+    def input_text(self, x: int = 1, y: int = 1, text: str = ""):
+        """
+            input_text(100, 100, text="测试")
+            input_text(text="测试")
+        """
 
-    def dump_hierarchy(self) -> Dict:
+        return self._invoke("Driver.inputText", args=[{"x": x, "y": y}, text])
+
+    def dump_hierarchy(self) -> HypiumResponse:
         """
         Dump the UI hierarchy of the device screen.
 
         Returns:
             Dict: The dumped UI hierarchy as a dictionary.
         """
-        return self.hdc.dump_hierarchy()
+        return self._invoke("captureLayout", method="Captures")
 
     @cached_property
     def gesture(self):
