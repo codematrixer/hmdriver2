@@ -66,11 +66,11 @@ export HDC_SERVER_PORT=7035
 
 3. 安装`hmdirver2` 基础库
 ```bash
-pip3 install -U hmdriver
+pip3 install -U hmdriver2
 ```
 如果需要使用[屏幕录屏](#屏幕录屏) 功能，则需要安装额外依赖`opencv-python`
 ```bash
-pip3 install -U "hmdriver[opencv-python]"
+pip3 install -U "hmdriver2[opencv-python]"
 //由于`opencv-python`比较大，因此没有写入到主依赖中
 ```
 
@@ -217,6 +217,7 @@ from hmdriver2.proto import DisplayRotation
 rotation = d.display_rotation
 # ouput: DisplayRotation.ROTATION_0
 ```
+
 设备旋转状态包括：
 ```python
 ROTATION_0 = 0    # 未旋转
@@ -224,7 +225,15 @@ ROTATION_90 = 1  # 顺时针旋转90度
 ROTATION_180 = 2  # 顺时针旋转180度
 ROTATION_270 = 3  # 顺时针旋转270度
 ```
-备注：目前旋转状态只能查看，不支持设置
+
+### 设置设备旋转
+```python
+from hmdriver2.proto import DisplayRotation
+
+# 旋转180度
+d.set_display_rotation(DisplayRotation.ROTATION_180)
+```
+
 
 
 ### Home

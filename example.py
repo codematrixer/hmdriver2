@@ -2,7 +2,7 @@
 
 import time
 from hmdriver2.driver import Driver
-from hmdriver2.proto import DeviceInfo, KeyCode, ComponentData
+from hmdriver2.proto import DeviceInfo, KeyCode, ComponentData, DisplayRotation
 
 
 # New driver
@@ -14,6 +14,7 @@ info: DeviceInfo = d.device_info
 
 d.display_size
 d.display_rotation
+d.set_display_rotation(DisplayRotation.ROTATION_180)
 
 d.install_app("~/develop/harmony_prj/demo.hap")
 d.clear_app("com.samples.test.uitest")

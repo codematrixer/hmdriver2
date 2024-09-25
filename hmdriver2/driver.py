@@ -156,6 +156,16 @@ class Driver:
         value = self._invoke(api).result
         return DisplayRotation.from_value(value)
 
+    def set_display_rotation(self, rotation: DisplayRotation):
+        """
+        Sets the display rotation to the specified orientation.
+
+        Args:
+            rotation (DisplayRotation): The desired display rotation. This should be an instance of the DisplayRotation enum.
+        """
+        api = "Driver.setDisplayRotation"
+        self._invoke(api, args=[rotation.value])
+
     @cached_property
     def device_info(self) -> DeviceInfo:
         """
