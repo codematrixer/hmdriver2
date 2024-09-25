@@ -121,7 +121,7 @@ class RecordClient(HmClient):
             self.release()
 
             # Invalidate the cached property
-            self.driver.invalidate_cache('screenrecord')
+            self.driver._invalidate_cache('screenrecord')
 
         except Exception as e:
             logger.error(f"An error occurred: {e}")

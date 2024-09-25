@@ -145,7 +145,7 @@ def test_swipe(d):
 
 
 def test_input_text(d):
-    d.input_text(0.5, 0.5, "adbcdfg")
+    d.input_text("adbcdfg")
 
 
 def test_dump_hierarchy(d):

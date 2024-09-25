@@ -24,6 +24,10 @@ class InvokeHypiumError(Exception):
     pass
 
 
+class InvokeCaptures(Exception):
+    pass
+
+
 class InjectGestureError(Exception):
     pass
 

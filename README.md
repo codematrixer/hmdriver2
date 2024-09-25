@@ -363,7 +363,7 @@ d.swipe(0.5, 0.8, 0.5, 0.4, speed=2000)
 
 #### 输入
 ```python
-d.input_text(x, y, text)
+d.input_text(text)
 
 # eg.
 d.input_text(0.3, 0.5, "adbcdfg")

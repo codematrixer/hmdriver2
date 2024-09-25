@@ -52,7 +52,7 @@ d.double_click(0.5, 0.4)
 d.long_click(500, 1000)
 d.long_click(0.5, 0.4)
 d.swipe(0.5, 0.8, 0.5, 0.4, speed=2000)
-d.input_text(0.5, 0.5, "adbcdfg")
+d.input_text("adbcdfg")
 
 # Device touch gersture
 d.gesture.start(630, 984, interval=.5).move(0.2, 0.4, interval=.5).pause(interval=1).move(0.5, 0.6, interval=.5).pause(interval=1).action()
