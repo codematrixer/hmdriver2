@@ -17,7 +17,7 @@ from .exception import InvokeHypiumError, InvokeCaptures
 
 
 UITEST_SERVICE_PORT = 8012
-SOCKET_TIMEOUT = 10
+SOCKET_TIMEOUT = 20
 
 
 class HmClient:

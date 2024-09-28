@@ -86,6 +86,7 @@ print(d.device_info)
 
 d.start_app("com.kuaishou.hmapp", "EntryAbility")
 d(text="精选").click()
+d.swipe(0.5, 0.8, 0.5, 0.4)
 ...
 ```
 
@@ -375,7 +376,7 @@ d.swipe(0.5, 0.8, 0.5, 0.4, speed=2000)
 d.input_text(text)
 
 # eg.
-d.input_text(0.3, 0.5, "adbcdfg")
+d.input_text("adbcdfg")
 ```
 参数`x`, `y`表示输入的位置，`text`表示输入的文本
 
@@ -624,11 +625,16 @@ toast = d.toast_watcher.get_toast()
 
 See [DEVELOP.md](/docs/DEVELOP.md)
 
+
 # 拓展阅读
 [hmdriver2 发布：开启鸿蒙 NEXT 自动化新时代](https://testerhome.com/topics/40667)
 
 
-# Refer to
+# Contributors
+[Contributors](https://github.com/codematrixer/hmdriver2/graphs/contributors)
+
+
+# Reference
 
 - https://developer.huawei.com/consumer/cn/doc/harmonyos-guides-V5/ut-V5
 - https://github.com/codematrixer/awesome-hdc

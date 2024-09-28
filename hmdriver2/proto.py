@@ -13,7 +13,7 @@ class CommandResult:
     exit_code: int
 
 
-class DisplayRotation(Enum):
+class DisplayRotation(int, Enum):
     ROTATION_0 = 0
     ROTATION_90 = 1
     ROTATION_180 = 2
