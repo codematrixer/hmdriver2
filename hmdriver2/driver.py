@@ -19,9 +19,6 @@ class Driver:
 
     def __init__(self, serial: str):
         self.serial = serial
-        if not self._is_device_online():
-            raise DeviceNotFoundError(f"Device [{self.serial}] not found")
-
         self._client = HmClient(self.serial)
         self.hdc = self._client.hdc
 
@@ -45,10 +42,6 @@ class Driver:
 
     def _init_hmclient(self):
         self._client.start()
-
-    def _is_device_online(self):
-        _serials = list_devices()
-        return True if self.serial in _serials else False
 
     def _invoke(self, api: str, args: List = []) -> HypiumResponse:
         return self._client.invoke(api, this="Driver#0", args=args)

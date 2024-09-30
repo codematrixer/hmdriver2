@@ -11,7 +11,7 @@ from typing import Union, List, Dict
 from . import logger
 from .utils import FreePort
 from .proto import CommandResult, KeyCode
-from .exception import HdcError
+from .exception import HdcError, DeviceNotFoundError
 
 
 def _execute_command(cmdargs: Union[str, List[str]]) -> CommandResult:
@@ -48,6 +48,12 @@ def list_devices() -> List[str]:
 class HdcWrapper:
     def __init__(self, serial: str) -> None:
         self.serial = serial
+        if not self.is_online():
+            raise DeviceNotFoundError(f"Device [{self.serial}] not found")
+
+    def is_online(self):
+        _serials = list_devices()
+        return True if self.serial in _serials else False
 
     def forward_port(self, rport: int) -> int:
         lport: int = FreePort().get()
