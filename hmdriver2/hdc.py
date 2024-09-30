@@ -39,6 +39,8 @@ def list_devices() -> List[str]:
     if result.exit_code == 0 and result.output:
         lines = result.output.strip().split('\n')
         for line in lines:
+            if line.__contains__('Empty'):
+                continue
             devices.append(line.strip())
     return devices
 

@@ -255,7 +255,7 @@ class Driver:
             x = int(w * x)
         if y < 1:
             y = int(h * y)
-        return Point(x, y)
+        return Point(int(x), int(y))
 
     @delay
     def click(self, x: Union[int, float], y: Union[int, float]):
