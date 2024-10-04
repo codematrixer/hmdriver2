@@ -28,6 +28,10 @@ def _execute_command(cmdargs: Union[str, List[str]]) -> CommandResult:
         output = output.decode('utf-8')
         error = error.decode('utf-8')
         exit_code = process.returncode
+
+        if output.lower().__contains__('error:'):
+            return CommandResult("", output, -1)
+
         return CommandResult(output, error, exit_code)
     except Exception as e:
         return CommandResult("", str(e), -1)
@@ -59,13 +63,13 @@ class HdcWrapper:
         lport: int = FreePort().get()
         result = _execute_command(f"hdc -t {self.serial} fport tcp:{lport} tcp:{rport}")
         if result.exit_code != 0:
-            raise HdcError("HDC forward port error", result.output)
+            raise HdcError("HDC forward port error", result.error)
         return lport
 
     def rm_forward(self, lport: int, rport: int) -> int:
         result = _execute_command(f"hdc -t {self.serial} fport rm tcp:{lport} tcp:{rport}")
         if result.exit_code != 0:
-            raise HdcError("HDC rm forward error", result.output)
+            raise HdcError("HDC rm forward error", result.error)
         return lport
 
     def list_fport(self) -> List:
@@ -74,25 +78,25 @@ class HdcWrapper:
         """
         result = _execute_command(f"hdc -t {self.serial} fport ls")
         if result.exit_code != 0:
-            raise HdcError("HDC forward list error", result.output)
+            raise HdcError("HDC forward list error", result.error)
         pattern = re.compile(r"tcp:\d+ tcp:\d+")
         return pattern.findall(result.output)
 
     def send_file(self, lpath: str, rpath: str):
         result = _execute_command(f"hdc -t {self.serial} file send {lpath} {rpath}")
         if result.exit_code != 0:
-            raise HdcError("HDC send file error", result.output)
+            raise HdcError("HDC send file error", result.error)
         return result
 
     def recv_file(self, rpath: str, lpath: str):
         result = _execute_command(f"hdc -t {self.serial} file recv {rpath} {lpath}")
         if result.exit_code != 0:
-            raise HdcError("HDC receive file error", result.output)
+            raise HdcError("HDC receive file error", result.error)
         return result
 
     def shell(self, cmd: str, error_raise=True) -> CommandResult:
         result = _execute_command(f"hdc -t {self.serial} shell {cmd}")
-        if result.error and error_raise:
+        if result.exit_code != 0 and error_raise:
             raise HdcError("HDC shell error", f"{cmd}\n{result.output}\n{result.error}")
         return result
 
@@ -103,9 +107,9 @@ class HdcWrapper:
         return result
 
     def install(self, apkpath: str):
-        result = _execute_command(f"hdc -t {self.serial} install {apkpath}")
+        result = _execute_command(f"hdc -t {self.serial} install '{apkpath}'")
         if result.exit_code != 0:
-            raise HdcError("HDC install error", result.output)
+            raise HdcError("HDC install error", result.error)
         return result
 
     def list_apps(self) -> List[str]:

@@ -45,15 +45,20 @@ def test_uninstall_app(d):
 
 
 def test_list_apps(d):
-    assert "com.kuaishou.hmapp" in d.list_apps()
+    assert "com.samples.test.uitest" in d.list_apps()
 
 
 def test_has_app(d):
-    assert d.has_app("com.kuaishou.hmapp")
+    assert d.has_app("com.samples.test.uitest")
+
+
+def test_current_app(d):
+    d.force_start_app("com.samples.test.uitest", "EntryAbility")
+    assert d.current_app() == ("com.samples.test.uitest", "EntryAbility")
 
 
 def test_get_app_info(d):
-    assert d.get_app_info("com.kuaishou.hmapp")
+    assert d.get_app_info("com.samples.test.uitest")
 
 
 def test_go_back(d):
@@ -82,7 +87,7 @@ def test_screen_off(d):
 def test_unlock(d):
     d.screen_off()
     d.unlock()
-    d.force_start_app("com.kuaishou.hmapp", "EntryAbility")
+    d.force_start_app("com.samples.test.uitest", "EntryAbility")
     assert d.hdc.screen_state() == "AWAKE"
 
 
@@ -107,8 +112,8 @@ def test_pull_file(d):
 
 
 def test_push_file(d):
-    lpath = "~/hilog.log1"
-    rpath = "/data/local/tmp/hilog.log"
+    lpath = "~/arch.png"
+    rpath = "/data/local/tmp/arch.png"
     d.push_file(lpath, rpath)
 
 
@@ -177,7 +182,7 @@ def test_screenrecord(d):
     path = "test.mp4"
     d.screenrecord.start(path)
 
-    d.force_start_app("com.kuaishou.hmapp", "EntryAbility")
+    d.force_start_app("com.samples.test.uitest", "EntryAbility")
     time.sleep(5)
     for _ in range(3):
         d.swipe(0.5, 0.8, 0.5, 0.3)
@@ -190,7 +195,7 @@ def test_screenrecord(d):
 def test_screenrecord2(d):
     path = "test2.mp4"
     with d.screenrecord.start(path):
-        d.force_start_app("com.kuaishou.hmapp", "EntryAbility")
+        d.force_start_app("com.samples.test.uitest", "EntryAbility")
         time.sleep(5)
         for _ in range(3):
             d.swipe(0.5, 0.8, 0.5, 0.3)

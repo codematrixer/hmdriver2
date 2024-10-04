@@ -201,6 +201,7 @@ class HmClient:
         if __check_device_so_file_exists() and __get_local_md5sum(local_path) == __get_remote_md5sum():
             return
         self.hdc.send_file(local_path, remote_path)
+        self.hdc.shell(f"chmod +x {remote_path}")
 
     def _restart_uitest_service(self):
         """
