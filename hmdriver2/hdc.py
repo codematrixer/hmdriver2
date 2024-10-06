@@ -6,7 +6,7 @@ import uuid
 import shlex
 import re
 import subprocess
-from typing import Union, List, Dict
+from typing import Union, List, Dict, Tuple
 
 from . import logger
 from .utils import FreePort
@@ -127,6 +127,38 @@ class HdcWrapper:
     def stop_app(self, package_name: str):
         return self.shell(f"aa force-stop {package_name}")
 
+    def current_app(self) -> Tuple[str, str]:
+        """
+        Get the current foreground application information.
+
+        Returns:
+            Tuple[str, str]: A tuple contain the package_name andpage_name of the foreground application.
+                             If no foreground application is found, returns (None, None).
+        """
+
+        def __extract_info(output: str):
+            results = []
+
+            mission_blocks = re.findall(r'Mission ID #[\s\S]*?isKeepAlive: false\s*}', output)
+            if not mission_blocks:
+                return results
+
+            for block in mission_blocks:
+                if 'state #FOREGROUND' in block:
+                    bundle_name_match = re.search(r'bundle name \[(.*?)\]', block)
+                    main_name_match = re.search(r'main name \[(.*?)\]', block)
+                    if bundle_name_match and main_name_match:
+                        package_name = bundle_name_match.group(1)
+                        page_name = main_name_match.group(1)
+                        results.append((package_name, page_name))
+
+            return results
+
+        data: CommandResult = self.shell("aa dump -l")
+        output = data.output
+        results = __extract_info(output)
+        return results[0] if results else (None, None)
+
     def wakeup(self):
         self.shell("power-shell wakeup")
 
@@ -171,6 +203,16 @@ class HdcWrapper:
     def cpu_abi(self) -> str:
         data = self.shell("param get const.product.cpu.abilist").output
         return self.__split_text(data)
+
+    def display_size(self) -> Tuple[int, int]:
+        data = self.shell("hidumper -s RenderService -a screen").output
+        match = re.search(r'activeMode:\s*(\d+)x(\d+),\s*refreshrate=\d+', data)
+
+        if match:
+            w = int(match.group(1))
+            h = int(match.group(2))
+            return (w, h)
+        return (0, 0)
 
     def send_key(self, key_code: Union[KeyCode, int]) -> None:
         if isinstance(key_code, KeyCode):

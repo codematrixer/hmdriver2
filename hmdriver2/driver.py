@@ -80,43 +80,16 @@ class Driver:
         """
         Get the current foreground application information.
 
-        This method executes a shell command to dump the current application state and extracts
-        the package_name and page_name of the application that is in the foreground state.
-
         Returns:
             Tuple[str, str]: A tuple contain the package_name andpage_name of the foreground application.
                              If no foreground application is found, returns (None, None).
         """
 
-        def __extract_info(output: str):
-            results = []
-
-            mission_blocks = re.findall(r'Mission ID #[\s\S]*?isKeepAlive: false\s*}', output)
-            if not mission_blocks:
-                return results
-
-            for block in mission_blocks:
-                if 'state #FOREGROUND' in block:
-                    bundle_name_match = re.search(r'bundle name \[(.*?)\]', block)
-                    main_name_match = re.search(r'main name \[(.*?)\]', block)
-                    if bundle_name_match and main_name_match:
-                        package_name = bundle_name_match.group(1)
-                        page_name = main_name_match.group(1)
-                        results.append((package_name, page_name))
-
-            return results
-
-        data: CommandResult = self.hdc.shell("aa dump -l")
-        output = data.output
-        results = __extract_info(output)
-        return results[0] if results else (None, None)
+        return self.hdc.current_app()
 
     def get_app_info(self, package_name: str) -> Dict:
         """
         Get detailed information about a specific application.
-
-        This method executes a shell command to dump the application information for the given package name
-        and parses the output as JSON to extract the application details.
 
         Args:
             package_name (str): The package name of the application to retrieve information for.
