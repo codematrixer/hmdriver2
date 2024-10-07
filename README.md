@@ -10,7 +10,7 @@
 
 `hmdriver2`是一款支持`HarmonyOS NEXT`系统的UI自动化框架，**无侵入式**，提供应用管理，UI操作，元素定位等功能，轻量高效，上手简单，快速实现鸿蒙应用自动化测试需求。
 
-![arch](./docs/img/arch.png)
+![arch](https://i.ibb.co/d603wQn/arch.png)
 
 # Key idea
 - **无侵入式**
@@ -43,9 +43,9 @@
   - 文本输入，清除
   - 获取控件树
 - 支持Toast获取
+- UI Inspector
 - [TODO] 全场景弹窗处理
 - [TODO] 操作标记
-- [TODO] Inspector
 
 
 
@@ -90,7 +90,13 @@ d.swipe(0.5, 0.8, 0.5, 0.4)
 ...
 ```
 
+# UI inspector
+UI 控件树可视化工具，查看控件树层级，获取控件详情。
 
+![ui-viewer](https://i.ibb.co/82BrJ1H/harmony.png)
+
+
+详细介绍请看 [ui-viewer](https://github.com/codematrixer/ui-viewer)
 
 ---
 
@@ -410,7 +416,7 @@ d.click(x, y)
 
 *如下是一个复杂手势的效果展示*
 
-![Watch the gif](./docs/img/gesture.gif)
+![Watch the gif](https://i.ibb.co/PC76PRD/gesture.gif)
 
 
 ## 控件操作
