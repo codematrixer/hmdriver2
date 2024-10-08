@@ -375,7 +375,25 @@ d.swipe(x1, y1, x2, y2, spped)
 d.swipe(600, 2600, 600, 1200, speed=2000)  # 上滑
 d.swipe(0.5, 0.8, 0.5, 0.4, speed=2000)
 ```
-参数`x1`, `y1`表示滑动的起始点，`x2`, `y2`表示滑动的终点，`speed`为滑动速率, 范围:200~40000, 不在范围内设为默认值为2000, 单位: 像素点/秒
+- `x1`, `y1`表示滑动的起始点，`x2`, `y2`表示滑动的终点
+- `speed`为滑动速率, 范围:200~40000, 不在范围内设为默认值为2000, 单位: 像素点/秒
+
+#### 滑动 ext
+```python
+
+d.swipe_ext("up")  # 向上滑动，"left", "right", "up", "down"
+d.swipe_ext("right", scale=0.8)  # 向右滑动，滑动距离为屏幕宽度的80%
+d.swipe_ext("up", box=(0.2, 0.2, 0.8, 0.8))  # 在屏幕 (0.2, 0.2) -> (0.8, 0.8) 这个区域上滑
+
+# 使用枚举作为参数
+from hmdriver2.proto import SwipeDirection
+d.swipe_ext(SwipeDirection.DOWN)  # 向下滑动
+```
+- `direction`表示滑动方向，可以为`up`, `down`, `left`, `right`, 也可以为`SwipeDirection`的枚举值
+- `scale`表示滑动距离百分比，范围:0.1~1.0, 默认值为0.8
+- `box`表示滑动区域，格式为`(x1, y1, x2, y2)`, 表示滑动区域的左上角和右下角的坐标，可以为绝对坐标值，也可以为相当坐标（屏幕百分比）
+  
+Notes: `swipe_ext`和`swipe`的区别在于swipe_ext可以指定滑动区域，并且可以指定滑动方向，更简洁灵活
 
 #### 输入
 ```python
