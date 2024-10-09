@@ -313,6 +313,11 @@ class Driver:
         api = "Driver.swipe"
         self._invoke(api, args=[point1.x, point1.y, point2.x, point2.y, speed])
 
+    @cached_property
+    def swipe_ext(self):
+        from ._swipe import SwipeExt
+        return SwipeExt(self)
+
     @delay
     def input_text(self, text: str):
         """
