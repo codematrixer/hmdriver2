@@ -46,6 +46,10 @@ def list_devices() -> List[str]:
             if line.__contains__('Empty'):
                 continue
             devices.append(line.strip())
+
+    if result.exit_code != 0:
+        raise HdcError("HDC error", result.error)
+
     return devices
 
 
