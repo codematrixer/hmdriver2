@@ -9,6 +9,7 @@ include = ["*/assets/*"]
 
 [tool.poetry.dependencies]
 python = "^3.8"
+lxml = "^5.3.0"
 
 [tool.poetry.extras]
 opencv-python = ["opencv-python-headless"]

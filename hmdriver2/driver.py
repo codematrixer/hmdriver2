@@ -315,6 +315,10 @@ class Driver:
 
     @cached_property
     def swipe_ext(self):
+        """
+        d.swipe_ext("up")
+        d.swipe_ext("up", box=(0.2, 0.2, 0.8, 0.8))
+        """
         from ._swipe import SwipeExt
         return SwipeExt(self)
 
@@ -359,3 +363,11 @@ class Driver:
         """
         if attribute_name in self.__dict__:
             del self.__dict__[attribute_name]
+
+    @cached_property
+    def xpath(self):
+        """
+        d.xpath("//*[@text='Hello']").click()
+        """
+        from ._xpath import _XPath
+        return _XPath(self)

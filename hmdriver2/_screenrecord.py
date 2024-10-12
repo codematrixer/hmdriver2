@@ -15,9 +15,9 @@ from .exception import ScreenRecordError
 
 
 class RecordClient(HmClient):
-    def __init__(self, serial: str, driver: Driver):
+    def __init__(self, serial: str, d: Driver):
         super().__init__(serial)
-        self.driver = driver
+        self.d = d
 
         self.video_path = None
         self.jpeg_queue = Queue()
@@ -121,7 +121,7 @@ class RecordClient(HmClient):
             self.release()
 
             # Invalidate the cached property
-            self.driver._invalidate_cache('screenrecord')
+            self.d._invalidate_cache('screenrecord')
 
         except Exception as e:
             logger.error(f"An error occurred: {e}")

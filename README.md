@@ -37,7 +37,7 @@
   - 屏幕录屏
   - 手势操作（点击，滑动，输入，复杂手势）
 - 支持控件操作
-  - 控件查找（联合查找，模糊查找，相对查找）
+  - 控件查找（联合查找，模糊查找，相对查找，xpath查找）
   - 控件信息获取
   - 控件点击，长按，拖拽，缩放
   - 文本输入，清除
@@ -122,7 +122,7 @@ UI 控件树可视化工具，查看控件树层级，获取控件详情。
     - [息屏](#息屏)
     - [屏幕解锁](#屏幕解锁)
     - [Key Events](#key-events)
-    - [执行hdc](#执行hdc)
+    - [执行 HDC 命令](#执行-hdc-命令)
     - [打开URL (schema)](#打开url-schema)
     - [文件操作](#文件操作)
     - [屏幕截图](#屏幕截图)
@@ -136,17 +136,23 @@ UI 控件树可视化工具，查看控件树层级，获取控件详情。
       - [输入](#输入)
       - [复杂手势](#复杂手势)
   - [控件操作](#控件操作)
-    - [控件选择器](#控件选择器)
-    - [控件查找](#控件查找)
-    - [控件信息](#控件信息)
-    - [控件数量](#控件数量)
-    - [控件点击](#控件点击)
-    - [控件双击](#控件双击)
-    - [控件长按](#控件长按)
-    - [控件拖拽](#控件拖拽)
-    - [控件缩放](#控件缩放)
-    - [控件输入](#控件输入)
-    - [文本清除](#文本清除)
+    - [常规选择器](#常规选择器)
+      - [控件查找](#控件查找)
+      - [控件信息](#控件信息)
+      - [控件数量](#控件数量)
+      - [控件点击](#控件点击)
+      - [控件双击](#控件双击)
+      - [控件长按](#控件长按)
+      - [控件拖拽](#控件拖拽)
+      - [控件缩放](#控件缩放)
+      - [控件输入](#控件输入)
+      - [文本清除](#文本清除)
+    - [XPath选择器](#xpath选择器)
+      - [xpath控件是否存在](#xpath控件是否存在)
+      - [xpath控件点击](#xpath控件点击)
+      - [xpath控件双击](#xpath控件双击)
+      - [xpath控件长按](#xpath控件长按)
+      - [xpath控件输入](#xpath控件输入)
   - [获取控件树](#获取控件树)
   - [获取Toast](#获取toast)
 
@@ -291,7 +297,6 @@ d.set_display_rotation(DisplayRotation.ROTATION_180)
 ```
 
 
-
 ### Home
 ```python
 d.go_home()
@@ -324,7 +329,7 @@ d.press_key(KeyCode.POWER)
 详细的Key code请参考 [harmony key code](https://github.com/codematrixer/hmdriver2/blob/4d7bceaded947bd63d737de180064679ad4c77b8/hmdriver2/proto.py#L133)
 
 
-### 执行hdc
+### 执行 HDC 命令
 ```python
 data = d.shell("ls -l /data/local/tmp")
 
@@ -488,7 +493,7 @@ d.click(x, y)
 
 ## 控件操作
 
-### 控件选择器
+### 常规选择器
 控件查找支持这些`by`属性
 - `id`
 - `key`
@@ -506,6 +511,7 @@ d.click(x, y)
 - `isBefore`
 - `isAfter`
 
+Notes: 获取控件属性值可以配合 [UI inspector](https://github.com/codematrixer/ui-viewer) 工具查看
 
 **普通定位**
 ```python
@@ -537,7 +543,7 @@ d(text="showToast", isAfter=True)
 d(id="drag", isBefore=True)
 ``` 
 
-### 控件查找
+#### 控件查找
 结合上面讲的控件选择器，就可以进行元素的查找
 ```python
 d(text="tab_recrod").exists()
@@ -550,7 +556,7 @@ d(text="tab_recrod").find_component()
 # 当没找到返回None
 ```
 
-### 控件信息
+#### 控件信息
 
 ```python
 d(text="tab_recrod").info
@@ -603,7 +609,7 @@ d(text="tab_recrod").boundsCenter
 ```
 
 
-### 控件数量
+#### 控件数量
 ```python
 d(type="Button").count   # 输出当前页面`type`为Button的元素数量
 
@@ -612,7 +618,7 @@ len(d(type="Button"))
 ```
 
 
-### 控件点击
+#### 控件点击
 ```python
 d(text="tab_recrod").click()
 d(type="Button", text="tab_recrod").click()
@@ -624,20 +630,20 @@ d(text="tab_recrod").click_if_exists()
 - `click` 如果元素没找到，会报错`ElementNotFoundError`
 - `click_if_exists` 即使元素没有找到，也不会报错，相当于跳过
 
-### 控件双击
+#### 控件双击
 ```python
 d(text="tab_recrod").double_click()
 d(type="Button", text="tab_recrod").double_click()
 ```
 
-### 控件长按
+#### 控件长按
 ```python
 d(text="tab_recrod").long_click()
 d(type="Button", text="tab_recrod").long_click()
 ```
 
 
-### 控件拖拽
+#### 控件拖拽
 ```python
 from hmdriver2.proto import ComponentData
 
@@ -649,7 +655,7 @@ d(type="ListItem").drag_to(componentB)
 ```
 `drag_to`的参数`component`为`ComponentData`类型
 
-### 控件缩放
+#### 控件缩放
 ```python
 # 将元素按指定的比例进行捏合缩小1倍
 d(text="tab_recrod").pinch_in(scale=0.5)
@@ -660,16 +666,54 @@ d(text="tab_recrod").pinch_out(scale=2)
 其中`scale`参数为放大和缩小比例
 
 
-### 控件输入
+#### 控件输入
 ```python
 d(text="tab_recrod").input_text("abc")
 ```
 
-### 文本清除
+#### 文本清除
 ```python
 d(text="tab_recrod").clear_text()
 ```
 
+### XPath选择器
+xpath选择器基于标准的xpath规范，也可以使用`//*[@属性="属性值"]`的样式（xpath lite）
+```python
+d.xpath('//root[1]/Row[1]/Column[1]/Row[1]/Button[3]')
+d.xpath('//*[@text="showDialog"]')
+```
+
+控件xpath路径获取可以配合 [UI inspector](https://github.com/codematrixer/ui-viewer) 工具查看
+
+#### xpath控件是否存在
+```python
+d.xpath('//*[@text="showDialog"]').exists()   # 返回True/False
+d.xpath('//root[1]/Row[1]/Column[1]/Row[1]/Button[3]').exists()
+```
+
+#### xpath控件点击
+```python
+d.xpath('//*[@text="showDialog"]').click()
+d.xpath('//root[1]/Row[1]/Column[1]/Row[1]/Button[3]').click_if_exists()
+```
+以上两个方法有一定的区别
+- `click` 如果元素没找到，会报错`XmlElementNotFoundError`
+- `click_if_exists` 即使元素没有找到，也不会报错，相当于跳过
+
+#### xpath控件双击
+```python
+d.xpath('//*[@text="showDialog"]').double_click()
+```
+
+#### xpath控件长按
+```python
+d.xpath('//*[@text="showDialog"]').long_click()
+```
+
+#### xpath控件输入
+```python
+d.xpath('//*[@text="showDialog"]').input_text("adb")
+```
 
 ## 获取控件树
 ```python

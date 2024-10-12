@@ -129,3 +129,9 @@ output:
     }
 }
 """
+
+# XPath
+d.xpath('//*[@text="showDialog"]').click()
+d.xpath('//*[@text="showDialog"]').click_if_exists()
+d.xpath('//root[1]/Row[1]/Column[1]/Row[1]/Button[3]').click()
+d.xpath('//*[@text="showDialog"]').input_text("xxx")

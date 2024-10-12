@@ -2,7 +2,7 @@
 
 import json
 from enum import Enum
-from typing import Union, List, Tuple
+from typing import Union, List
 from dataclasses import dataclass, asdict
 
 
@@ -84,17 +84,6 @@ class ComponentData:
 
 
 @dataclass
-class Rect:
-    left: int
-    right: int
-    top: int
-    bottom: int
-
-    def get_center(self) -> Tuple[int, int]:
-        return int((self.left + self.right) / 2), int((self.top + self.bottom) / 2)
-
-
-@dataclass
 class Point:
     x: int
     y: int
@@ -107,6 +96,18 @@ class Point:
             "x": self.x,
             "y": self.y
         }
+
+
+@dataclass
+class Bounds:
+    left: int
+    top: int
+    right: int
+    bottom: int
+
+    def get_center(self) -> Point:
+        return Point(int((self.left + self.right) / 2),
+                     int((self.top + self.bottom) / 2))
 
 
 @dataclass
@@ -124,7 +125,7 @@ class ElementInfo:
     isClickable: bool
     isLongClickable: bool
     isScrollable: bool
-    bounds: Rect
+    bounds: Bounds
     boundsCenter: Point
 
     def __str__(self) -> str:

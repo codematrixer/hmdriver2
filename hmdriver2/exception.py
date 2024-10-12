@@ -8,6 +8,10 @@ class ElementFoundTimeout(Exception):
     pass
 
 
+class XmlElementNotFoundError(Exception):
+    pass
+
+
 class HmDriverError(Exception):
     pass
 

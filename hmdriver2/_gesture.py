@@ -14,15 +14,15 @@ class _Gesture:
     SAMPLE_TIME_NORMAL = 50
     SAMPLE_TIME_MAX = 100
 
-    def __init__(self, driver: Driver, sampling_ms=50):
+    def __init__(self, d: Driver, sampling_ms=50):
         """
         Initialize a gesture object.
 
         Args:
-            driver (Driver): The driver object to interact with.
+            d (Driver): The driver object to interact with.
             sampling_ms (int): Sampling time for gesture operation points in milliseconds. Default is 50.
         """
-        self.driver = driver
+        self.d = d
         self.steps: List[GestureStep] = []
         self.sampling_ms = self._validate_sampling_time(sampling_ms)
 
@@ -117,7 +117,7 @@ class _Gesture:
         """
         fingers = 1
         api = "PointerMatrix.create"
-        data: HypiumResponse = self.driver._client.invoke(api, this=None, args=[fingers, total_points])
+        data: HypiumResponse = self.d._client.invoke(api, this=None, args=[fingers, total_points])
         return data.result
 
     def _inject_pointer_actions(self, pointer_matrix):
@@ -128,7 +128,7 @@ class _Gesture:
             pointer_matrix (PointerMatrix): Pointer matrix to inject.
         """
         api = "Driver.injectMultiPointerAction"
-        self.driver._client.invoke(api, args=[pointer_matrix, 2000])
+        self.d._client.invoke(api, args=[pointer_matrix, 2000])
 
     def _add_step(self, x: int, y: int, step_type: str, interval: float):
         """
@@ -140,7 +140,7 @@ class _Gesture:
             step_type (str): Type of step ("start", "move", or "pause").
             interval (float): Interval duration in seconds.
         """
-        point: Point = self.driver._to_abs_pos(x, y)
+        point: Point = self.d._to_abs_pos(x, y)
         step = GestureStep(point.to_tuple(), step_type, interval)
         self.steps.append(step)
 
@@ -179,7 +179,7 @@ class _Gesture:
             if interval is not None:
                 point.x += 65536 * interval
             api = "PointerMatrix.setPoint"
-            self.driver._client.invoke(api, this=pointer_matrix, args=[0, point_index, point.to_dict()])
+            self.d._client.invoke(api, this=pointer_matrix, args=[0, point_index, point.to_dict()])
 
         point_index = 0
 

@@ -8,7 +8,7 @@ from . import logger
 from .utils import delay
 from ._client import HmClient
 from .exception import ElementNotFoundError
-from .proto import ComponentData, ByData, HypiumResponse, Point, Rect, ElementInfo
+from .proto import ComponentData, ByData, HypiumResponse, Point, Bounds, ElementInfo
 
 
 class ByType(enum.Enum):
@@ -180,9 +180,9 @@ class UiObject:
         return self.__operate("Component.isScrollable")
 
     @property
-    def bounds(self) -> Rect:
+    def bounds(self) -> Bounds:
         _raw = self.__operate("Component.getBounds")
-        return Rect(**_raw)
+        return Bounds(**_raw)
 
     @property
     def boundsCenter(self) -> Point:

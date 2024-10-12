@@ -202,3 +202,18 @@ def test_screenrecord2(d):
     d.go_home()
 
     assert os.path.isfile(path)
+
+
+def test_xpath(d):
+    d.force_start_app("com.samples.test.uitest", "EntryAbility")
+
+    xpath1 = '//root[1]/Row[1]/Column[1]/Row[1]/Button[3]'   # showToast
+    xpath2 = '//*[@text="showDialog"]'
+
+    d.toast_watcher.start()
+    d.xpath(xpath1).click()
+    toast = d.toast_watcher.get_toast()
+    print(f"toast: {toast}")
+    assert toast == "testMessage"
+
+    d.xpath(xpath2).click()

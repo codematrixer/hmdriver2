@@ -246,7 +246,7 @@ class HdcWrapper:
         return path
 
     def dump_hierarchy(self) -> Dict:
-        _tmp_path = "/data/local/tmp/_tmp.json"
+        _tmp_path = f"/data/local/tmp/{self.serial}_tmp.json"
         self.shell(f"uitest dumpLayout -p {_tmp_path}")
 
         with tempfile.NamedTemporaryFile(delete=False, suffix=".json") as f:
