@@ -174,7 +174,7 @@ class Driver:
         Sets the display rotation to the specified orientation.
 
         Args:
-            rotation (DisplayRotation): The desired display rotation. This should be an instance of the DisplayRotation enum.
+            rotation (DisplayRotation): display rotation.
         """
         api = "Driver.setDisplayRotation"
         self._invoke(api, args=[rotation.value])
@@ -300,7 +300,8 @@ class Driver:
             y1 (float): The start Y coordinate as a percentage or absolute value.
             x2 (float): The end X coordinate as a percentage or absolute value.
             y2 (float): The end Y coordinate as a percentage or absolute value.
-            speed (int, optional): The swipe speed in pixels per second. Default is 2000. Range: 200-40000. If not within the range, set to default value of 2000.
+            speed (int, optional): The swipe speed in pixels per second. Default is 2000. Range: 200-40000,
+            If not within the range, set to default value of 2000.
         """
 
         point1 = self._to_abs_pos(x1, y1)

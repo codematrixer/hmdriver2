@@ -29,7 +29,7 @@ def _execute_command(cmdargs: Union[str, List[str]]) -> CommandResult:
         error = error.decode('utf-8')
         exit_code = process.returncode
 
-        if output.lower().__contains__('error:'):
+        if 'error:' in output.lower() or '[fail]:' in output.lower():
             return CommandResult("", output, -1)
 
         return CommandResult(output, error, exit_code)
@@ -111,7 +111,8 @@ class HdcWrapper:
         return result
 
     def install(self, apkpath: str):
-        result = _execute_command(f"hdc -t {self.serial} install '{apkpath}'")
+        quoted_path = shlex.quote(apkpath)
+        result = _execute_command(f"hdc -t {self.serial} install {quoted_path}")
         if result.exit_code != 0:
             raise HdcError("HDC install error", result.error)
         return result
@@ -254,7 +255,7 @@ class HdcWrapper:
             self.recv_file(_tmp_path, path)
 
             try:
-                with open(path, 'r') as file:
+                with open(path, 'r', encoding='utf8') as file:
                     data = json.load(file)
             except Exception as e:
                 logger.error(f"Error loading JSON file: {e}")

@@ -19,7 +19,7 @@ class _XPath:
 
         hierarchy: Dict = self._d.dump_hierarchy()
         if not hierarchy:
-            raise XmlElementNotFoundError(f"xpath: {xpath} not found")
+            raise RuntimeError("hierarchy is empty")
 
         xml = _XPath._json2xml(hierarchy)
         result = xml.xpath(xpath)
