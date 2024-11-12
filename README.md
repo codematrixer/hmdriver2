@@ -5,7 +5,7 @@
 [![downloads](https://pepy.tech/badge/hmdriver2)](https://pepy.tech/project/hmdriver2)
 
 
->写这个项目前github上已有个[hmdirver](https://github.com/mrx1203/hmdriver)，但它是侵入式（需要提前在手机端安装一个testRunner app）。另外鸿蒙官方提供的hypium自动化框架，使用较为复杂，依赖繁杂。于是决定重写一套。
+> 写这个项目前github上已有个[hmdirver](https://github.com/mrx1203/hmdriver)，但它是侵入式（需要提前在手机端安装一个testRunner app）；另外鸿蒙官方提供的hypium自动化框架，使用较为复杂，依赖繁杂。于是决定重写一套。
 
 
 `hmdriver2`是一款支持`HarmonyOS NEXT`系统的UI自动化框架，**无侵入式**，提供应用管理，UI操作，元素定位等功能，轻量高效，上手简单，快速实现鸿蒙应用自动化测试需求。
@@ -53,10 +53,10 @@
    
 1. 配置鸿蒙`HDC`环境
    1. 下载 [Command Line Tools](https://developer.huawei.com/consumer/cn/download/) 并解压
-   2. `hdc`文件在`command-line-tools/sdk/HarmonyOS-NEXT-DB2/openharmony/toolchains`目录下
+   2. `hdc`文件在`command-line-tools/sdk/default/openharmony/toolchains`目录下
    3. 配置环境变量，macOS为例，在~/.bash_profile 或者 ~/.zshrc文件中添加
 ```bash
-export HM_SDK_HOME="/Users/develop/command-line-tools/sdk/HarmonyOS-NEXT-DB2"  //请以sdk实际安装目录为准
+export HM_SDK_HOME="/Users/develop/command-line-tools/sdk/default"  //请以sdk实际安装目录为准
 export PATH=$PATH:$HM_SDK_HOME/hms/toolchains:$HM_SDK_HOME/openharmony/toolchains
 export HDC_SERVER_PORT=7035
 ```
@@ -68,10 +68,11 @@ export HDC_SERVER_PORT=7035
 ```bash
 pip3 install -U hmdriver2
 ```
-如果需要使用[屏幕录屏](#屏幕录屏) 功能，则需要安装额外依赖`opencv-python`
+如果需要使用[屏幕录屏](#屏幕录屏) 功能，则需要安装额外依赖`opencv-python` 
+(由于`opencv-python`比较大，因此没有写入到主依赖中，按需安装)
+
 ```bash
 pip3 install -U "hmdriver2[opencv-python]"
-//由于`opencv-python`比较大，因此没有写入到主依赖中
 ```
 
 
