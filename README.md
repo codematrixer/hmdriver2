@@ -99,6 +99,20 @@ UI 控件树可视化工具，查看控件树层级，获取控件详情。
 
 详细介绍请看 [ui-viewer](https://github.com/codematrixer/ui-viewer)
 
+
+# Environment
+如何需要连接远端的HDC Server来实现远程设备调试，运行脚本前需要设置环境变量
+```bash
+export HDC_SERVER_HOST=127.0.0.1  # hdc server host
+export HDC_SERVER_PORT=8710
+```
+
+PS 移除环境变量
+```
+unset HDC_SERVER_HOST
+unset HDC_SERVER_PORT
+```
+
 ---
 
 # API Documents
@@ -736,19 +750,6 @@ d(text="xx").click()
 toast = d.toast_watcher.get_toast()
 
 # output: 'testMessage'
-```
-
-# Environment
-如何需要连接远端的HDC Server来实现远程设备调试，运行脚本前需要设置环境变量
-```bash
-export HDC_SERVER_HOST=127.0.0.1  # hdc server host
-export HDC_SERVER_PORT=8710
-```
-
-PS 移除环境变量
-```
-unset HDC_SERVER_HOST
-unset HDC_SERVER_PORT
 ```
 
 # 鸿蒙Uitest协议
