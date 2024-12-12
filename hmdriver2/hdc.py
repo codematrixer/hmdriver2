@@ -29,7 +29,7 @@ def _execute_command(cmdargs: Union[str, List[str]]) -> CommandResult:
         error = error.decode('utf-8')
         exit_code = process.returncode
 
-        if 'error:' in output.lower() or '[fail]:' in output.lower():
+        if 'error:' in output.lower() or '[fail]' in output.lower():
             return CommandResult("", output, -1)
 
         return CommandResult(output, error, exit_code)
@@ -111,7 +111,9 @@ class HdcWrapper:
         return result
 
     def install(self, apkpath: str):
-        quoted_path = shlex.quote(apkpath)
+        # Ensure the path is properly quoted for Windows
+        quoted_path = f'"{apkpath}"'
+
         result = _execute_command(f"hdc -t {self.serial} install {quoted_path}")
         if result.exit_code != 0:
             raise HdcError("HDC install error", result.error)

@@ -450,15 +450,6 @@ d.swipe_ext(SwipeDirection.DOWN)  # 向下滑动
   
 Notes: `swipe_ext`和`swipe`的区别在于swipe_ext可以指定滑动区域，并且可以指定滑动方向，更简洁灵活
 
-#### 输入
-```python
-d.input_text(text)
-
-# eg.
-d.input_text("adbcdfg")
-```
-参数`x`, `y`表示输入的位置，`text`表示输入的文本
-
 
 #### 复杂手势
 复杂手势就是手指按下`start`，移动`move`，暂停`pause`的集合，最后运行`action`
@@ -490,6 +481,16 @@ d.click(x, y)
 *如下是一个复杂手势的效果展示*
 
 ![Watch the gif](https://i.ibb.co/PC76PRD/gesture.gif)
+
+
+#### 输入
+```python
+d.input_text(text)
+
+# eg.
+d.input_text("adbcdfg")
+```
+参数`x`, `y`表示输入的位置，`text`表示输入的文本
 
 
 ## 控件操作
