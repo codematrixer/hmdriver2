@@ -5,6 +5,7 @@ import json
 import uuid
 import shlex
 import re
+import os
 import subprocess
 from typing import Union, List, Dict, Tuple
 
@@ -37,9 +38,22 @@ def _execute_command(cmdargs: Union[str, List[str]]) -> CommandResult:
         return CommandResult("", str(e), -1)
 
 
+def _build_hdc_prefix() -> str:
+    """
+    Construct the hdc command prefix based on environment variables.
+    """
+    host = os.getenv("HDC_SERVER_HOST")
+    port = os.getenv("HDC_SERVER_PORT")
+    if host and port:
+        logger.debug(f"HDC_SERVER_HOST: {host}, HDC_SERVER_PORT: {port}")
+        return f"hdc -s {host}:{port}"
+    return "hdc"
+
+
 def list_devices() -> List[str]:
     devices = []
-    result = _execute_command('hdc list targets')
+    hdc_prefix = _build_hdc_prefix()
+    result = _execute_command(f"{hdc_prefix} list targets")
     if result.exit_code == 0 and result.output:
         lines = result.output.strip().split('\n')
         for line in lines:
@@ -56,6 +70,8 @@ def list_devices() -> List[str]:
 class HdcWrapper:
     def __init__(self, serial: str) -> None:
         self.serial = serial
+        self.hdc_prefix = _build_hdc_prefix()
+
         if not self.is_online():
             raise DeviceNotFoundError(f"Device [{self.serial}] not found")
 
@@ -65,13 +81,13 @@ class HdcWrapper:
 
     def forward_port(self, rport: int) -> int:
         lport: int = FreePort().get()
-        result = _execute_command(f"hdc -t {self.serial} fport tcp:{lport} tcp:{rport}")
+        result = _execute_command(f"{self.hdc_prefix} -t {self.serial} fport tcp:{lport} tcp:{rport}")
         if result.exit_code != 0:
             raise HdcError("HDC forward port error", result.error)
         return lport
 
     def rm_forward(self, lport: int, rport: int) -> int:
-        result = _execute_command(f"hdc -t {self.serial} fport rm tcp:{lport} tcp:{rport}")
+        result = _execute_command(f"{self.hdc_prefix} -t {self.serial} fport rm tcp:{lport} tcp:{rport}")
         if result.exit_code != 0:
             raise HdcError("HDC rm forward error", result.error)
         return lport
@@ -80,32 +96,32 @@ class HdcWrapper:
         """
         eg.['tcp:10001 tcp:8012', 'tcp:10255 tcp:8012']
         """
-        result = _execute_command(f"hdc -t {self.serial} fport ls")
+        result = _execute_command(f"{self.hdc_prefix} -t {self.serial} fport ls")
         if result.exit_code != 0:
             raise HdcError("HDC forward list error", result.error)
         pattern = re.compile(r"tcp:\d+ tcp:\d+")
         return pattern.findall(result.output)
 
     def send_file(self, lpath: str, rpath: str):
-        result = _execute_command(f"hdc -t {self.serial} file send {lpath} {rpath}")
+        result = _execute_command(f"{self.hdc_prefix} -t {self.serial} file send {lpath} {rpath}")
         if result.exit_code != 0:
             raise HdcError("HDC send file error", result.error)
         return result
 
     def recv_file(self, rpath: str, lpath: str):
-        result = _execute_command(f"hdc -t {self.serial} file recv {rpath} {lpath}")
+        result = _execute_command(f"{self.hdc_prefix} -t {self.serial} file recv {rpath} {lpath}")
         if result.exit_code != 0:
             raise HdcError("HDC receive file error", result.error)
         return result
 
     def shell(self, cmd: str, error_raise=True) -> CommandResult:
-        result = _execute_command(f"hdc -t {self.serial} shell {cmd}")
+        result = _execute_command(f"{self.hdc_prefix} -t {self.serial} shell {cmd}")
         if result.exit_code != 0 and error_raise:
             raise HdcError("HDC shell error", f"{cmd}\n{result.output}\n{result.error}")
         return result
 
     def uninstall(self, bundlename: str):
-        result = _execute_command(f"hdc -t {self.serial} uninstall {bundlename}")
+        result = _execute_command(f"{self.hdc_prefix} -t {self.serial} uninstall {bundlename}")
         if result.exit_code != 0:
             raise HdcError("HDC uninstall error", result.output)
         return result
@@ -114,7 +130,7 @@ class HdcWrapper:
         # Ensure the path is properly quoted for Windows
         quoted_path = f'"{apkpath}"'
 
-        result = _execute_command(f"hdc -t {self.serial} install {quoted_path}")
+        result = _execute_command(f"{self.hdc_prefix} -t {self.serial} install {quoted_path}")
         if result.exit_code != 0:
             raise HdcError("HDC install error", result.error)
         return result
