@@ -101,14 +101,14 @@ UI 控件树可视化工具，查看控件树层级，获取控件详情。
 
 
 # Environment
-如何需要连接远端的HDC Server来实现远程设备调试，运行脚本前需要设置环境变量
+如何需要连接远端的HDC Server来实现操作远端设备执行自动化，运行脚本前需要设置环境变量
 ```bash
-export HDC_SERVER_HOST=127.0.0.1  # hdc server host
+export HDC_SERVER_HOST=127.0.0.1  # Replace with the remote host
 export HDC_SERVER_PORT=8710
 ```
 
-PS 移除环境变量
-```
+PS 如果需要移除环境变量，执行以下命令
+```bash
 unset HDC_SERVER_HOST
 unset HDC_SERVER_PORT
 ```
