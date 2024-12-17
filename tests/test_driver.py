@@ -10,9 +10,9 @@ from hmdriver2.proto import KeyCode, DisplayRotation
 
 @pytest.fixture
 def d():
-    d = Driver("FMR0223C13000649")
+    d = Driver()
     yield d
-    d._client.release()
+    del d
 
 
 def test_driver(d):

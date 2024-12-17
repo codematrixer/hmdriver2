@@ -80,7 +80,8 @@ pip3 install -U "hmdriver2[opencv-python]"
 ```python
 from hmdriver2.driver import Driver
 
-d = Driver("FMR0223C13000649")  # 替换成你的serial
+d = Driver()  # 如果不传serial则默认读取第一个设备
+# d = Driver("FMR0223C13000649")  # 指定设备序列号
 
 print(d.device_info)
 # ouput: DeviceInfo(productName='HUAWEI Mate 60 Pro', model='ALN-AL00', sdkVersion='12', sysVersion='ALN-AL00 5.0.0.60(SP12DEVC00E61R4P9log)', cpuAbi='arm64-v8a', wlanIp='172.31.125.111', displaySize=(1260, 2720), displayRotation=<DisplayRotation.ROTATION_0: 0>)
@@ -176,10 +177,11 @@ unset HDC_SERVER_PORT
 ```python
 from hmdriver2.driver import Driver
 
-d = Driver("FMR0223C13000649")
+d = Driver()
+# d = Driver("FMR0223C13000649")
 ```
 
-参数`serial` 通过`hdc list targets` 命令获取
+参数`serial` 通过`hdc list targets` 命令获取；如果不传serial，则默认读取`hdc list targets`的第一个设备
 
 初始化driver后，下面所有的操作都是调用dirver实现
 

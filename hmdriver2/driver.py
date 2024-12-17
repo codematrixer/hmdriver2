@@ -3,39 +3,76 @@
 import json
 import uuid
 import re
-from typing import Type, Any, Tuple, Dict, Union, List
+from typing import Type, Any, Tuple, Dict, Union, List, Optional
 from functools import cached_property  # python3.8+
 
 from . import logger
 from .utils import delay
 from ._client import HmClient
 from ._uiobject import UiObject
+from .hdc import list_devices
+from .exception import DeviceNotFoundError
 from .proto import HypiumResponse, KeyCode, Point, DisplayRotation, DeviceInfo, CommandResult
 
 
 class Driver:
-    _instance: Dict = {}
+    _instance: Dict[str, "Driver"] = {}
 
-    def __init__(self, serial: str):
+    def __new__(cls: Type["Driver"], serial: Optional[str] = None) -> "Driver":
+        """
+        Ensure that only one instance of Driver exists per serial.
+        If serial is None, use the first serial from list_devices().
+        """
+        serial = cls._prepare_serial(serial)
+
+        if serial not in cls._instance:
+            instance = super().__new__(cls)
+            cls._instance[serial] = instance
+            # Temporarily store the serial in the instance for initialization
+            instance._serial_for_init = serial
+        return cls._instance[serial]
+
+    def __init__(self, serial: Optional[str] = None):
+        """
+        Initialize the Driver instance. Only initialize if `_initialized` is not set.
+        """
+        if hasattr(self, "_initialized") and self._initialized:
+            return
+
+        # Use the serial prepared in `__new__`
+        serial = getattr(self, "_serial_for_init", serial)
+        if serial is None:
+            raise ValueError("Serial number is required for initialization.")
+
         self.serial = serial
         self._client = HmClient(self.serial)
         self.hdc = self._client.hdc
-
         self._init_hmclient()
+        self._initialized = True  # Mark the instance as initialized
+        del self._serial_for_init  # Clean up temporary attribute
 
-    def __new__(cls: Type[Any], serial: str) -> Any:
+    @classmethod
+    def _prepare_serial(cls, serial: str = None) -> str:
         """
-        Ensure that only one instance of Driver exists per device serial number.
+        Prepare the serial. Use the first available device if serial is None.
         """
-        if serial not in cls._instance:
-            cls._instance[serial] = super().__new__(cls)
-        return cls._instance[serial]
+        devices = list_devices()
+        if not devices:
+            raise DeviceNotFoundError("No devices found. Please connect a device.")
+
+        if serial is None:
+            logger.info(f"No serial provided, using the first device: {devices[0]}")
+            return devices[0]
+        if serial not in devices:
+            raise DeviceNotFoundError(f"Device [{serial}] not found")
+        return serial
 
     def __call__(self, **kwargs) -> UiObject:
 
         return UiObject(self._client, **kwargs)
 
     def __del__(self):
+        Driver._instance.clear()
         if hasattr(self, '_client') and self._client:
             self._client.release()
 
