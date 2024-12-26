@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
-
+import re
 import socket
 import json
 import time
 import os
+import glob
 import typing
 import subprocess
-import hashlib
 from datetime import datetime
 from functools import cached_property
 
@@ -18,6 +18,8 @@ from .exception import InvokeHypiumError, InvokeCaptures
 
 UITEST_SERVICE_PORT = 8012
 SOCKET_TIMEOUT = 20
+ASSETS_PATH = os.path.join(os.path.dirname(__file__), "assets")
+AGENT_CLEAR_PATH = ["app", "commons-", "agent", "libagent_antry"]
 
 
 class HmClient:
@@ -169,39 +171,53 @@ class HmClient:
     def _init_so_resource(self):
         "Initialize the agent.so resource on the device."
 
-        logger.debug("init the agent.so resource on the device.")
+        file_postfix = ".so"
+        device_agent_path = "/data/local/tmp/agent.so"
+        arch_info = self.hdc.shell("file /system/bin/uitest").output.strip()
+        if "x86_64" in arch_info:
+            file_postfix = ".x86_64_so"
+        local_path = ""
+        local_ver = "0.0.0"
+        for agent_file in glob.glob(os.path.join(ASSETS_PATH, "uitest_agent*so")):
+            file_name = os.path.split(agent_file)[1]
+            if not agent_file.endswith(file_postfix):
+                continue
+            matcher = re.search(r'\d{1,3}[.]\d{1,3}[.]\d{1,3}', file_name)
+            if not matcher:
+                continue
+            ver = matcher.group()[0]
+            if ver.split('.') > local_ver.split('.'):
+                local_ver, local_path = ver, agent_file
+        device_ver_info = self.hdc.shell(f"cat {device_agent_path} | grep -a UITEST_AGENT_LIBRARY").output.strip()
+        matcher = re.search(r'\d{1,3}[.]\d{1,3}[.]\d{1,3}', device_ver_info)
+        device_ver = matcher.group(0) if matcher else "0.0.0"
+        logger.debug(f"local agent version {local_ver}, device agent version {device_ver}")
+        if device_ver.split('.') < local_ver.split('.'):
+            logger.debug(f"start update agent, path is {local_path}")
+            self._kill_uitest_service()
+            for file in AGENT_CLEAR_PATH:
+                self.hdc.shell(f"rm /data/local/tmp/{file}*")
+            self.hdc.send_file(local_path, device_agent_path)
+            self.hdc.shell(f"chmod +x {device_agent_path}")
+            logger.debug("Update agent finish.")
+        else:
+            logger.debug("Device agent is up to date!")
 
-        def __get_so_local_path() -> str:
-            current_path = os.path.realpath(__file__)
-            return os.path.join(os.path.dirname(current_path), "assets", "uitest_agent_v1.1.0.so")
+    def get_devicetest_proc_pid(self):
+        proc_pids = []
+        result = self.hdc.shell("ps -ef").output.strip()
+        lines = result.splitlines()
+        filtered_lines = [line for line in lines if 'uitest' in line and 'singleness' in line]
+        for line in filtered_lines:
+            if 'uitest start-daemon singleness' not in line:
+                continue
+            proc_pids.append(line.split()[1])
+        return proc_pids
 
-        def __check_device_so_file_exists() -> bool:
-            """Check if the agent.so file exists on the device."""
-            command = "[ -f /data/local/tmp/agent.so ] && echo 'so exists' || echo 'so not exists'"
-            result = self.hdc.shell(command).output.strip()
-            return "so exists" in result
-
-        def __get_remote_md5sum() -> str:
-            """Get the MD5 checksum of the file on the device."""
-            command = "md5sum /data/local/tmp/agent.so"
-            data = self.hdc.shell(command).output.strip()
-            return data.split()[0]
-
-        def __get_local_md5sum(f: str) -> str:
-            """Calculate the MD5 checksum of a local file."""
-            hash_md5 = hashlib.md5()
-            with open(f, "rb") as f:
-                for chunk in iter(lambda: f.read(4096), b""):
-                    hash_md5.update(chunk)
-            return hash_md5.hexdigest()
-
-        local_path = __get_so_local_path()
-        remote_path = "/data/local/tmp/agent.so"
-
-        if __check_device_so_file_exists() and __get_local_md5sum(local_path) == __get_remote_md5sum():
-            return
-        self.hdc.send_file(local_path, remote_path)
-        self.hdc.shell(f"chmod +x {remote_path}")
+    def _kill_uitest_service(self):
+        for pid in self.get_devicetest_proc_pid():
+            self.hdc.shell(f"kill -9 {pid}")
+            logger.debug(f"Killed uitest process with PID {pid}")
 
     def _restart_uitest_service(self):
         """
@@ -213,17 +229,7 @@ class HmClient:
         shell        44416     1 2 11:03:42 ?     00:00:01 uitest start-daemon com.hmtest.uitest@4x9@1"
         """
         try:
-            result = self.hdc.shell("ps -ef").output.strip()
-            lines = result.splitlines()
-            filtered_lines = [line for line in lines if 'uitest' in line and 'singleness' in line]
-
-            for line in filtered_lines:
-                if 'uitest start-daemon singleness' in line:
-                    parts = line.split()
-                    pid = parts[1]
-                    self.hdc.shell(f"kill -9 {pid}")
-                    logger.debug(f"Killed uitest process with PID {pid}")
-
+            self._kill_uitest_service()
             self.hdc.shell("uitest start-daemon singleness")
             time.sleep(.5)
 
