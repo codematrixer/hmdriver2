@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 import tempfile
 import json
 import uuid
@@ -115,6 +114,10 @@ class HdcWrapper:
         return result
 
     def shell(self, cmd: str, error_raise=True) -> CommandResult:
+        if cmd[0] != '\"':
+            cmd = "\"" + cmd
+        if cmd[-1] != '\"':
+            cmd += '\"'
         result = _execute_command(f"{self.hdc_prefix} -t {self.serial} shell {cmd}")
         if result.exit_code != 0 and error_raise:
             raise HdcError("HDC shell error", f"{cmd}\n{result.output}\n{result.error}")
