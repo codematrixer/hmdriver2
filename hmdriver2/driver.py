@@ -83,10 +83,11 @@ class Driver:
         return self._client.invoke(api, this="Driver#0", args=args)
 
     @delay
-    def start_app(self, package_name: str, page_name: str = "MainAbility"):
+    def start_app(self, package_name: str, page_name: str = ''):
+        page_name = page_name or self.get_app_main_ability(package_name).get('name', 'MainAbility')
         self.hdc.start_app(package_name, page_name)
 
-    def force_start_app(self, package_name: str, page_name: str = "MainAbility"):
+    def force_start_app(self, package_name: str, page_name: str = ""):
         self.go_home()
         self.stop_app(package_name)
         self.start_app(package_name, page_name)
@@ -147,6 +148,74 @@ class Driver:
         except Exception as e:
             logger.error(f"An error occurred:{e}")
         return app_info
+
+    def get_app_abilities(self, package_name: str) -> List[Dict]:
+        """
+        Get the abilities of an application.
+
+
+        Args:
+            package_name (str): The package name of the application to retrieve information for.
+
+        Returns:
+            List[Dict]: A list of dictionaries containing the abilities of the application.
+        """
+        result = []
+        app_info = self.get_app_info(package_name)
+        hap_module_infos = app_info.get("hapModuleInfos")
+        main_entry = app_info.get("mainEntry")
+        for hap_module_info in hap_module_infos:
+            # 尝试读取moduleInfo
+            try:
+                ability_infos = hap_module_info.get("abilityInfos")
+                module_main = hap_module_info["mainAbility"]
+            except Exception as e:
+                logger.warning(f"Fail to parse moduleInfo item, {repr(e)}")
+                continue
+            # 尝试读取abilityInfo
+            for ability_info in ability_infos:
+                try:
+                    is_launcher_ability = False
+                    skills = ability_info['skills']
+                    if len(skills) > 0 or "action.system.home" in skills[0]["actions"]:
+                        is_launcher_ability = True
+                    icon_ability_info = {
+                        "name": ability_info["name"],
+                        "moduleName": ability_info["moduleName"],
+                        "moduleMainAbility": module_main,
+                        "mainModule": main_entry,
+                        "isLauncherAbility": is_launcher_ability
+                    }
+                    result.append(icon_ability_info)
+                except Exception as e:
+                    logger.warning(f"Fail to parse ability_info item, {repr(e)}")
+                    continue
+        logger.debug(f"all abilities: {result}")
+        return result
+
+    def get_app_main_ability(self, package_name: str) -> Dict:
+        """
+        Get the main ability of an application.
+
+        Args:
+            package_name (str): The package name of the application to retrieve information for.
+
+        Returns:
+            Dict: A dictionary containing the main ability of the application.
+
+        """
+        if not (abilities := self.get_app_abilities(package_name)):
+            return {}
+        for item in abilities:
+            score = 0
+            if (name := item["name"]) and name == item["moduleMainAbility"]:
+                score += 1
+            if (module_name := item["moduleName"]) and module_name == item["mainModule"]:
+                score += 1
+            item["score"] = score
+        abilities.sort(key=lambda x: (not x["isLauncherAbility"], -x["score"]))
+        logger.debug(f"main ability: {abilities[0]}")
+        return abilities[0]
 
     @cached_property
     def toast_watcher(self):
