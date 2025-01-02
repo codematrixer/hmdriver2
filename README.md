@@ -80,13 +80,12 @@ pip3 install -U "hmdriver2[opencv-python]"
 ```python
 from hmdriver2.driver import Driver
 
-d = Driver()  # 如果不传serial则默认读取第一个设备
-# d = Driver("FMR0223C13000649")  # 指定设备序列号
+d = Driver()
 
 print(d.device_info)
 # ouput: DeviceInfo(productName='HUAWEI Mate 60 Pro', model='ALN-AL00', sdkVersion='12', sysVersion='ALN-AL00 5.0.0.60(SP12DEVC00E61R4P9log)', cpuAbi='arm64-v8a', wlanIp='172.31.125.111', displaySize=(1260, 2720), displayRotation=<DisplayRotation.ROTATION_0: 0>)
 
-d.start_app("com.kuaishou.hmapp", "EntryAbility")
+d.start_app("com.kuaishou.hmapp")
 d(text="精选").click()
 d.swipe(0.5, 0.8, 0.5, 0.4)
 ...
@@ -127,6 +126,7 @@ unset HDC_SERVER_PORT
     - [停止App](#停止app)
     - [清除App数据](#清除app数据)
     - [获取App详情](#获取app详情)
+    - [获取App main ability](#获取App-main-ability)
   - [设备操作](#设备操作)
     - [获取设备信息](#获取设备信息)
     - [获取设备分辨率](#获取设备分辨率)
