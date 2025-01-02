@@ -83,11 +83,20 @@ class Driver:
         return self._client.invoke(api, this="Driver#0", args=args)
 
     @delay
-    def start_app(self, package_name: str, page_name: str = ''):
-        page_name = page_name or self.get_app_main_ability(package_name).get('name', 'MainAbility')
+    def start_app(self, package_name: str, page_name: Optional[str] = None):
+        """
+        Start an application on the device.
+        If the `package_name` is empty, it will retrieve main ability using `get_app_main_ability`.
+
+        Args:
+            package_name (str): The package name of the application.
+            page_name (Optional[str]): Ability Name within the application to start.
+        """
+        if not page_name:
+            page_name = self.get_app_main_ability(package_name).get('name', 'MainAbility')
         self.hdc.start_app(package_name, page_name)
 
-    def force_start_app(self, package_name: str, page_name: str = ""):
+    def force_start_app(self, package_name: str, page_name: Optional[str] = None):
         self.go_home()
         self.stop_app(package_name)
         self.start_app(package_name, page_name)
@@ -153,9 +162,8 @@ class Driver:
         """
         Get the abilities of an application.
 
-
         Args:
-            package_name (str): The package name of the application to retrieve information for.
+            package_name (str): The package name of the application.
 
         Returns:
             List[Dict]: A list of dictionaries containing the abilities of the application.

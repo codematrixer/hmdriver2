@@ -200,10 +200,13 @@ d.uninstall_app("com.kuaishou.hmapp")
 ### 启动App
 
 ```python
+d.start_app("com.kuaishou.hmapp")
+
 d.start_app("com.kuaishou.hmapp", "EntryAbility")
 ```
-传入的两个参数分别是`package_name`, `page_name`，可以通过hdc命令获取`hdc shell aa dump -l`
+`package_name`, `page_name`分别为包名和ability name，可以通过hdc命令获取：`hdc shell aa dump -l`
 
+不传`page_name`时，默认会使用main ability作为`page_name`
 
 ### 停止App
 ```python
@@ -258,6 +261,23 @@ d.get_app_info("com.kuaishou.hmapp")
 }
 ```
 
+### 获取App main ability
+```python
+d.get_app_main_ability("com.kuaishou.hmapp")
+```
+
+输出的数据结构是Dict, 内容如下
+
+```
+{
+    "name": "EntryAbility",
+    "moduleName": "kwai",
+    "moduleMainAbility": "EntryAbility",
+    "mainModule": "kwai",
+    "isLauncherAbility": true,
+    "score": 2
+}
+```
 
 ## 设备操作
 ### 获取设备信息

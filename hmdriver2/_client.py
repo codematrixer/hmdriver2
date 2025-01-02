@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
-import re
 import socket
 import json
 import time
 import os
-import glob
+import hashlib
 import typing
-import subprocess
+from typing import Optional
 from datetime import datetime
 from functools import cached_property
 
@@ -143,8 +142,7 @@ class HmClient:
 
     def start(self):
         logger.info("Start HmClient connection")
-        self._init_so_resource()
-        self._restart_uitest_service()
+        _UITestService(self.hdc).init()
 
         self._connect_sock()
 
@@ -163,47 +161,79 @@ class HmClient:
             logger.error(f"An error occurred: {e}")
 
     def _create_hdriver(self) -> DriverData:
-        logger.debug("create uitest driver")
+        logger.debug("Create uitest driver")
         resp: HypiumResponse = self.invoke("Driver.create")  # {"result":"Driver#0"}
         hdriver: DriverData = DriverData(resp.result)
         return hdriver
 
-    def _init_so_resource(self):
-        "Initialize the agent.so resource on the device."
 
-        file_postfix = ".so"
-        device_agent_path = "/data/local/tmp/agent.so"
-        arch_info = self.hdc.shell("file /system/bin/uitest").output.strip()
-        if "x86_64" in arch_info:
-            file_postfix = ".x86_64_so"
-        local_path = ""
-        local_ver = "0.0.0"
-        for agent_file in glob.glob(os.path.join(ASSETS_PATH, "uitest_agent*so")):
-            file_name = os.path.split(agent_file)[1]
-            if not agent_file.endswith(file_postfix):
-                continue
-            matcher = re.search(r'\d{1,3}[.]\d{1,3}[.]\d{1,3}', file_name)
-            if not matcher:
-                continue
-            ver = matcher.group()[0]
-            if ver.split('.') > local_ver.split('.'):
-                local_ver, local_path = ver, agent_file
-        device_ver_info = self.hdc.shell(f"cat {device_agent_path} | grep -a UITEST_AGENT_LIBRARY").output.strip()
-        matcher = re.search(r'\d{1,3}[.]\d{1,3}[.]\d{1,3}', device_ver_info)
-        device_ver = matcher.group(0) if matcher else "0.0.0"
-        logger.debug(f"local agent version {local_ver}, device agent version {device_ver}")
-        if device_ver.split('.') < local_ver.split('.'):
-            logger.debug(f"start update agent, path is {local_path}")
-            self._kill_uitest_service()
-            for file in AGENT_CLEAR_PATH:
-                self.hdc.shell(f"rm /data/local/tmp/{file}*")
-            self.hdc.send_file(local_path, device_agent_path)
-            self.hdc.shell(f"chmod +x {device_agent_path}")
-            logger.debug("Update agent finish.")
-        else:
-            logger.debug("Device agent is up to date!")
+class _UITestService:
+    def __init__(self, hdc: HdcWrapper):
+        """Initialize the UITestService class."""
+        self.hdc = hdc
 
-    def get_devicetest_proc_pid(self):
+    def init(self):
+        """
+        Initialize the UITest service:
+        1. Ensure agent.so is set up on the device.
+        2. Start the UITest daemon.
+
+        Note: 'hdc shell aa test' will also start a uitest daemon.
+        $ hdc shell ps -ef |grep uitest
+        shell        44306     1 25 11:03:37 ?    00:00:16 uitest start-daemon singleness
+        shell        44416     1 2 11:03:42 ?     00:00:01 uitest start-daemon com.hmtest.uitest@4x9@1"
+        """
+
+        logger.debug("Initializing UITest service")
+        local_path = self._get_local_agent_path()
+        remote_path = "/data/local/tmp/agent.so"
+
+        self._kill_uitest_service()  # Stop the service if running
+        self._setup_device_agent(local_path, remote_path)
+        self._start_uitest_daemon()
+        time.sleep(0.5)
+
+    def _get_local_agent_path(self) -> str:
+        """Return the local path of the agent file."""
+        target_agent = "uitest_agent_v1.1.0.so"
+        return os.path.join(os.path.dirname(os.path.realpath(__file__)), "assets", target_agent)
+
+    def _get_remote_md5sum(self, file_path: str) -> Optional[str]:
+        """Get the MD5 checksum of a remote file."""
+        command = f"md5sum {file_path}"
+        output = self.hdc.shell(command).output.strip()
+        return output.split()[0] if output else None
+
+    def _get_local_md5sum(self, file_path: str) -> str:
+        """Get the MD5 checksum of a local file."""
+        hash_md5 = hashlib.md5()
+        with open(file_path, "rb") as f:
+            for chunk in iter(lambda: f.read(4096), b""):
+                hash_md5.update(chunk)
+        return hash_md5.hexdigest()
+
+    def _is_remote_file_exists(self, file_path: str) -> bool:
+        """Check if a file exists on the device."""
+        command = f"[ -f {file_path} ] && echo 'exists' || echo 'not exists'"
+        result = self.hdc.shell(command).output.strip()
+        return "exists" in result
+
+    def _setup_device_agent(self, local_path: str, remote_path: str):
+        """Ensure the remote agent file is correctly set up."""
+        if self._is_remote_file_exists(remote_path):
+            local_md5 = self._get_local_md5sum(local_path)
+            remote_md5 = self._get_remote_md5sum(remote_path)
+            if local_md5 == remote_md5:
+                logger.debug("Remote agent file is up-to-date")
+                self.hdc.shell(f"chmod +x {remote_path}")
+                return
+            self.hdc.shell(f"rm {remote_path}")
+
+        self.hdc.send_file(local_path, remote_path)
+        self.hdc.shell(f"chmod +x {remote_path}")
+        logger.debug("Updated remote agent file")
+
+    def _get_uitest_pid(self) -> typing.List[str]:
         proc_pids = []
         result = self.hdc.shell("ps -ef").output.strip()
         lines = result.splitlines()
@@ -215,23 +245,11 @@ class HmClient:
         return proc_pids
 
     def _kill_uitest_service(self):
-        for pid in self.get_devicetest_proc_pid():
+        for pid in self._get_uitest_pid():
             self.hdc.shell(f"kill -9 {pid}")
             logger.debug(f"Killed uitest process with PID {pid}")
 
-    def _restart_uitest_service(self):
-        """
-        Restart the UITest daemon.
-
-        Note: 'hdc shell aa test' will also start a uitest daemon.
-        $ hdc shell ps -ef |grep uitest
-        shell        44306     1 25 11:03:37 ?    00:00:16 uitest start-daemon singleness
-        shell        44416     1 2 11:03:42 ?     00:00:01 uitest start-daemon com.hmtest.uitest@4x9@1"
-        """
-        try:
-            self._kill_uitest_service()
-            self.hdc.shell("uitest start-daemon singleness")
-            time.sleep(.5)
-
-        except subprocess.CalledProcessError as e:
-            logger.error(f"An error occurred: {e}")
+    def _start_uitest_daemon(self):
+        """Start the UITest daemon."""
+        self.hdc.shell("uitest start-daemon singleness")
+        logger.debug("Started UITest daemon")

@@ -114,6 +114,7 @@ class HdcWrapper:
         return result
 
     def shell(self, cmd: str, error_raise=True) -> CommandResult:
+        # ensure the command is wrapped in double quotes
         if cmd[0] != '\"':
             cmd = "\"" + cmd
         if cmd[-1] != '\"':

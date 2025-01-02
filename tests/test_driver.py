@@ -32,6 +32,12 @@ def test_force_start_app(d):
     d.force_start_app("com.samples.test.uitest", "EntryAbility")
 
 
+def test_get_app_main_ability(d):
+    d.unlock()
+    ability = d.get_app_main_ability("com.samples.test.uitest")
+    assert ability.get("name") == "EntryAbility"
+
+
 def test_clear_app(d):
     d.clear_app("com.samples.test.uitest")
 
