@@ -17,8 +17,6 @@ from .exception import InvokeHypiumError, InvokeCaptures
 
 UITEST_SERVICE_PORT = 8012
 SOCKET_TIMEOUT = 20
-ASSETS_PATH = os.path.join(os.path.dirname(__file__), "assets")
-AGENT_CLEAR_PATH = ["app", "commons-", "agent", "libagent_antry"]
 
 
 class HmClient:

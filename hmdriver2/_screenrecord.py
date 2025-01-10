@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-import queue
+
 import typing
 import threading
 import numpy as np
-from queue import Queue
+import queue
 from datetime import datetime
 
 import cv2
@@ -20,7 +20,7 @@ class RecordClient(HmClient):
         self.d = d
 
         self.video_path = None
-        self.jpeg_queue = Queue()
+        self.jpeg_queue = queue.Queue()
         self.threads: typing.List[threading.Thread] = []
         self.stop_event = threading.Event()
 
@@ -102,7 +102,7 @@ class RecordClient(HmClient):
                 img = cv2.imdecode(np.frombuffer(jpeg_image, np.uint8), cv2.IMREAD_COLOR)
             except queue.Empty:
                 pass
-            if not img:
+            if img is None or img.size == 0:
                 continue
             if cv2_instance is None:
                 height, width = img.shape[:2]
