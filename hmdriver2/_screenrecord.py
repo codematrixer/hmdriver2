@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+import queue
 import typing
 import threading
 import numpy as np
@@ -95,16 +95,21 @@ class RecordClient(HmClient):
     def _video_writer(self):
         """Write frames to video file."""
         cv2_instance = None
+        img = None
         while not self.stop_event.is_set():
-            if not self.jpeg_queue.empty():
+            try:
                 jpeg_image = self.jpeg_queue.get(timeout=0.1)
                 img = cv2.imdecode(np.frombuffer(jpeg_image, np.uint8), cv2.IMREAD_COLOR)
-                if cv2_instance is None:
-                    height, width = img.shape[:2]
-                    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-                    cv2_instance = cv2.VideoWriter(self.video_path, fourcc, 10, (width, height))
+            except queue.Empty:
+                pass
+            if not img:
+                continue
+            if cv2_instance is None:
+                height, width = img.shape[:2]
+                fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+                cv2_instance = cv2.VideoWriter(self.video_path, fourcc, 10, (width, height))
 
-                cv2_instance.write(img)
+            cv2_instance.write(img)
 
         if cv2_instance:
             cv2_instance.release()
