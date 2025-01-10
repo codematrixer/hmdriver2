@@ -5,12 +5,17 @@
 [![downloads](https://pepy.tech/badge/hmdriver2)](https://pepy.tech/project/hmdriver2)
 
 
-> 写这个项目前github上已有个[hmdirver](https://github.com/mrx1203/hmdriver)，但它是侵入式（需要提前在手机端安装一个testRunner app）；另外鸿蒙官方提供的hypium自动化框架，使用较为复杂，依赖繁杂。于是决定重写一套。
+> 写这个项目前github上已有个叫`hmdriver`的项目，但它是侵入式（需要提前在手机端安装一个testRunner app）；另外鸿蒙官方提供的hypium自动化框架，使用较为复杂，依赖繁杂。于是决定重写一套。
 
 
-`hmdriver2`是一款支持`HarmonyOS NEXT`系统的UI自动化框架，**无侵入式**，提供应用管理，UI操作，元素定位等功能，轻量高效，上手简单，快速实现鸿蒙应用自动化测试需求。
+**hmdriver2** 是一款支持`HarmonyOS NEXT`系统的UI自动化框架，**无侵入式**，提供应用管理，UI操作，元素定位等功能，轻量高效，上手简单，快速实现鸿蒙应用自动化测试需求。
 
 ![arch](https://i.ibb.co/d603wQn/arch.png)
+
+
+*微信交流群（永久生效）*
+
+<img src="https://i.ibb.co/Xx9HcKk/wechat.png" alt="wechat" style="float: left" />
 
 # Key idea
 - **无侵入式**
