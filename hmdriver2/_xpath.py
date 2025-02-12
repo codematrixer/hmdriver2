@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import re
 from typing import Dict
 from lxml import etree
 from functools import cached_property
@@ -37,6 +38,8 @@ class _XPath:
     def _json2xml(hierarchy: Dict) -> etree.Element:
         attributes = hierarchy.get("attributes", {})
         tag = attributes.get("type", "orgRoot") or "orgRoot"
+        # Clean the "text" attribute to be compatible with XML format
+        attributes["text"] = re.sub(u"[^\u0020-\uD7FF\u0009\u000A\u000D\uE000-\uFFFD\U00010000-\U0010FFFF]+", "", attributes.get("text", ""))
         xml = etree.Element(tag, attrib=attributes)
 
         children = hierarchy.get("children", [])
