@@ -29,7 +29,9 @@ class _XPath:
             raw_bounds: str = node.attrib.get("bounds")  # [832,1282][1125,1412]
             bounds: Bounds = parse_bounds(raw_bounds)
             logger.debug(f"{xpath} Bounds: {bounds}")
-            return _XMLElement(bounds, self._d)
+            _xe = _XMLElement(bounds, self._d)
+            setattr(_xe, "attrib_info", node.attrib)
+            return _xe
 
         return _XMLElement(None, self._d)
 
@@ -91,3 +93,17 @@ class _XMLElement:
     def input_text(self, text):
         self.click()
         self._d.input_text(text)
+
+    @property
+    @delay
+    def info(self) -> dict:
+        if hasattr(self, 'attrib_info'):
+            return getattr(self, 'attrib_info')
+        else:
+            logger.warning("the attribute <attrib_info> does not exists！")
+            return {}
+
+    @property
+    @delay
+    def text(self) -> str:
+        return self.info.get("text")
