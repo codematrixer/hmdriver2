@@ -12,8 +12,9 @@ from .exception import XmlElementNotFoundError
 
 
 class _XPath:
-    def __init__(self, d: Driver):
+    def __init__(self, d: Driver,first_event=True):
         self._d = d
+        self.first_event=first_event
 
     def __call__(self, xpath: str) -> '_XMLElement':
 
@@ -25,11 +26,21 @@ class _XPath:
         result = xml.xpath(xpath)
 
         if len(result) > 0:
-            node = result[0]
-            raw_bounds: str = node.attrib.get("bounds")  # [832,1282][1125,1412]
-            bounds: Bounds = parse_bounds(raw_bounds)
-            logger.debug(f"{xpath} Bounds: {bounds}")
-            return _XMLElement(bounds, self._d)
+            if self.first_event:
+                node = result[0]
+                raw_bounds: str = node.attrib.get("bounds")  # [832,1282][1125,1412]
+                bounds: Bounds = parse_bounds(raw_bounds)
+                logger.debug(f"{xpath} Bounds: {bounds}")
+                return _XMLElement(bounds, self._d)
+            else:
+                result_event_list = []
+                for node in result:
+                    raw_bounds: str = node.attrib.get("bounds")  # [832,1282][1125,1412]
+                    bounds: Bounds = parse_bounds(raw_bounds)
+                    logger.debug(f"{xpath} Bounds: {bounds}")
+                    result_event_list.append(_XMLElement2(bounds, self._d))
+                return result_event_list
+
 
         return _XMLElement(None, self._d)
 
