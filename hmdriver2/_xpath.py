@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import re
 from typing import Dict
 from lxml import etree
 from functools import cached_property
@@ -34,14 +35,25 @@ class _XPath:
         return _XMLElement(None, self._d)
 
     @staticmethod
+    def _sanitize_text(text: str) -> str:
+        """Remove XML-incompatible control characters."""
+        return re.sub(r'[\x00-\x1F\x7F]', '', text)
+
+    @staticmethod
     def _json2xml(hierarchy: Dict) -> etree.Element:
+        """Convert JSON-like hierarchy to XML."""
         attributes = hierarchy.get("attributes", {})
-        tag = attributes.get("type", "orgRoot") or "orgRoot"
-        xml = etree.Element(tag, attrib=attributes)
+
+        # 过滤所有属性的值，确保无非法字符
+        cleaned_attributes = {k: _XPath._sanitize_text(str(v)) for k, v in attributes.items()}
+
+        tag = cleaned_attributes.get("type", "orgRoot") or "orgRoot"
+        xml = etree.Element(tag, attrib=cleaned_attributes)
 
         children = hierarchy.get("children", [])
         for item in children:
             xml.append(_XPath._json2xml(item))
+
         return xml
 
 
