@@ -486,3 +486,12 @@ class Driver:
         """
         from ._xpath import _XPath
         return _XPath(self)
+
+    @cached_property
+    def xpath_all_event(self):
+        """
+        d.xpath_all_event("//*[@text='Hello']")
+        :return: [event,event]
+        """
+        from ._xpath import _XPath
+        return _XPath(self,first_event=False)
