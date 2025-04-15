@@ -254,8 +254,21 @@ class Driver:
         self.hdc.send_key(KeyCode.HOME)
 
     @delay
+    def go_recent(self):
+        self.press_keys(KeyCode.META_LEFT, KeyCode.TAB)
+
+    @delay
     def press_key(self, key_code: Union[KeyCode, int]):
         self.hdc.send_key(key_code)
+
+    @delay
+    def press_keys(self, key_code1: Union[KeyCode, int], key_code2: Union[KeyCode, int]):
+        """Press two keys in sequence, given their integer key codes."""
+        code1 = key_code1.value if isinstance(key_code1, KeyCode) else key_code1
+        code2 = key_code2.value if isinstance(key_code2, KeyCode) else key_code2
+
+        api = "Driver.triggerCombineKeys"
+        self._invoke(api, args=[code1, code2])
 
     def screen_on(self):
         self.hdc.wakeup()
