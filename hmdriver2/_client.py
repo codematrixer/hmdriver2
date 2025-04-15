@@ -192,8 +192,10 @@ class _UITestService:
         time.sleep(0.5)
 
     def _get_local_agent_path(self) -> str:
-        """Return the local path of the agent file."""
-        target_agent = "uitest_agent_v1.1.0.so"
+        """Return the local path of the agent file, based on the cpu_abi version (e.g., 'so/arm64-v8a/agent.so')."""
+        cpu_abi = self.hdc.cpu_abi()
+
+        target_agent = os.path.join("so", cpu_abi, "agent.so")
         return os.path.join(os.path.dirname(os.path.realpath(__file__)), "assets", target_agent)
 
     def _get_remote_md5sum(self, file_path: str) -> Optional[str]:
