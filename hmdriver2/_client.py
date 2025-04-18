@@ -62,23 +62,39 @@ class HmClient:
         logger.debug(f"sendMsg: {msg}")
         self.sock.sendall(msg.encode('utf-8') + b'\n')
 
-    def _recv_msg(self, buff_size: int = 4096, decode=False, print=True) -> typing.Union[bytearray, str]:
+    def _recv_msg(self, buff_size: int = 4096, decode: bool = False, debug: bool = True) -> typing.Union[bytearray, str]:
+        """recv the msg from server
+        The return should be a vaild json. Used to 
+        multiply the buff_size to get the entire
+        """
         full_msg = bytearray()
-        try:
-            # FIXME
-            relay = self.sock.recv(buff_size)
-            if decode:
-                relay = relay.decode()
-            if print:
-                logger.debug(f"recvMsg: {relay}")
-            full_msg = relay
+        while True:
+            try:
+                relay = self.sock.recv(buff_size)
+                full_msg.extend(relay)
+                json.loads(full_msg)
+                break
+            except json.JSONDecodeError as NOT_EOF:
+                buff_size *= 4
+                continue
+            except (socket.timeout, UnicodeDecodeError) as e:
+                logger.warning(e)
+                if decode:
+                    full_msg = ""
+                break
 
-        except (socket.timeout, UnicodeDecodeError) as e:
-            logger.warning(e)
-            if decode:
-                full_msg = ""
+        def get_decoded_msg():
+            nonlocal decoded_result
+            if decoded_result is None:
+                decoded_result = full_msg.decode('utf-8')
+            return decoded_result
 
-        return full_msg
+        decoded_result = None
+
+        if debug:
+            logger.debug(f"recvMsg: {get_decoded_msg()}")
+
+        return get_decoded_msg() if decode else full_msg
 
     def invoke(self, api: str, this: str = "Driver#0", args: typing.List = []) -> HypiumResponse:
         """
