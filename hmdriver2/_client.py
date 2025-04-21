@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import socket
 import json
+import struct
 import time
 import os
 import hashlib
@@ -20,6 +21,12 @@ SOCKET_TIMEOUT = 20
 
 
 class HmClient:
+    HEADER_BYTES = b'_uitestkit_rpc_message_head_'
+    TAILER_BYTES = b'_uitestkit_rpc_message_tail_'
+    HEADER_LENGTH = len(HEADER_BYTES)
+    TAILER_LENGTH = len(TAILER_BYTES)
+    SESSION_ID_LENGTH = 4  # 4 bytes for session ID
+
     """harmony uitest client"""
     def __init__(self, serial: str):
         self.hdc = HdcWrapper(serial)
@@ -58,27 +65,89 @@ class HmClient:
                 "client": "127.0.0.1"
             }
         """
-        msg = json.dumps(msg, ensure_ascii=False, separators=(',', ':'))
-        logger.debug(f"sendMsg: {msg}")
-        self.sock.sendall(msg.encode('utf-8') + b'\n')
+        msg_str = json.dumps(msg, ensure_ascii=False, separators=(',', ':'))
+        logger.debug(f"sendMsg: {msg_str}")
 
-    def _recv_msg(self, buff_size: int = 4096, decode=False, print=True) -> typing.Union[bytearray, str]:
-        full_msg = bytearray()
+        # 生成 session_id
+        msg_bytes = msg_str.encode('utf-8')
+        session_id = self._generate_session_id(msg_str)
+        header = (
+                self.HEADER_BYTES +
+                struct.pack('>I', session_id) +
+                struct.pack('>I', len(msg_bytes))
+        )
+
+        # 发送完整消息
+        self.sock.sendall(header + msg_bytes + self.TAILER_BYTES)
+
+    def _generate_session_id(self, message: str) -> int:
+        """
+        生成 sessionId 的逻辑，将时间戳、消息字符串拼接后生成整数哈希值。
+        """
+        # 拼接时间戳和消息字符串，添加随机熵
+        combined = (
+                str(int(time.time() * 1000)) +  # 毫秒时间戳
+                message +
+                os.urandom(4).hex()  # 16字节随机熵
+        )
+        return int(hashlib.sha256(combined.encode()).hexdigest()[:8], 16)
+
+    def _recv_msg(self, decode=False, print=True) -> typing.Union[bytearray, str]:
+        """
+        接收消息，解析请求头和尾部，返回消息内容。
+        """
         try:
-            # FIXME
-            relay = self.sock.recv(buff_size)
-            if decode:
-                relay = relay.decode()
+            # 接收头部
+            header_len = self.HEADER_LENGTH + self.SESSION_ID_LENGTH + 4
+            header = self._recv_exact(header_len) # 头部 + session_id + length
+            if not header or header[:len(self.HEADER_BYTES)] != self.HEADER_BYTES:
+                logger.warning("Invalid header received")
+                return ""
+
+            # 解析消息长度（目前无需验证session_id，所以不做处理）
+            msg_length = struct.unpack('>I', header[self.HEADER_LENGTH + self.SESSION_ID_LENGTH:])[0]  # 大端序
+
+            # 接收消息体
+            msg_bytes = self._recv_exact(msg_length)
+            if not msg_bytes:
+                logger.warning("Failed to receive message body")
+                return ""
+
+            # 接收尾部
+            tailer = self._recv_exact(self.TAILER_LENGTH)
+            if not tailer or tailer != self.TAILER_BYTES:
+                logger.warning("Invalid tailer received")
+                return ""
+
+            # 解码消息
+            if not decode:
+                logger.debug(f"recvMsg byte message (size: %d)", len(msg_bytes))
+                return bytearray(msg_bytes)
+
+            msg_str = msg_bytes.decode('utf-8')
             if print:
-                logger.debug(f"recvMsg: {relay}")
-            full_msg = relay
+                logger.debug(f"recvMsg: {msg_str}")
+            return msg_str
 
-        except (socket.timeout, UnicodeDecodeError) as e:
-            logger.warning(e)
-            if decode:
-                full_msg = ""
+        except (socket.timeout, ValueError, json.JSONDecodeError) as e:
+            logger.warning(f"Error receiving message: {e}")
+            return ""
 
-        return full_msg
+    def _recv_exact(self, length: int) -> bytes:
+        """
+        确保接收指定长度的数据。
+        """
+        buf = bytearray(length)
+        view = memoryview(buf)
+        pos = 0
+
+        while pos < length:
+            chunk_size = self.sock.recv_into(view[pos:], length - pos)
+            if not chunk_size:
+                raise ConnectionError("Connection closed during receive")
+            pos += chunk_size
+
+        return buf
 
     def invoke(self, api: str, this: str = "Driver#0", args: typing.List = []) -> HypiumResponse:
         """
