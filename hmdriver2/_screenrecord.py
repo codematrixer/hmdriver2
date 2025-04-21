@@ -51,7 +51,7 @@ class RecordClient(HmClient):
 
         self._send_msg("startCaptureScreen", [])
 
-        reply: str = self._recv_msg(1024, decode=True, print=False)
+        reply: str = self._recv_msg(decode=True, print=False)
         if "true" in reply:
             record_th = threading.Thread(target=self._record_worker)
             writer_th = threading.Thread(target=self._video_writer)
@@ -74,7 +74,7 @@ class RecordClient(HmClient):
         buffer = bytearray()
         while not self.stop_event.is_set():
             try:
-                buffer += self._recv_msg(4096 * 1024, decode=False, print=False)
+                buffer += self._recv_msg(decode=False, print=False)
             except Exception as e:
                 print(f"Error receiving data: {e}")
                 break
@@ -121,7 +121,7 @@ class RecordClient(HmClient):
                 t.join()
 
             self._send_msg("stopCaptureScreen", [])
-            self._recv_msg(1024, decode=True, print=False)
+            self._recv_msg(decode=True, print=False)
 
             self.release()
 
