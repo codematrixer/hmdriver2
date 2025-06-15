@@ -2,10 +2,12 @@
 [![github actions](https://github.com/codematrixer/hmdriver2/actions/workflows/release.yml/badge.svg)](https://github.com/codematrixer/hmdriver2/actions)
 [![pypi version](https://img.shields.io/pypi/v/hmdriver2.svg)](https://pypi.python.org/pypi/hmdriver2)
 ![python](https://img.shields.io/pypi/pyversions/hmdriver2.svg)
-[![downloads](https://pepy.tech/badge/hmdriver2)](https://pepy.tech/project/hmdriver2)
+[![downloads](https://pepy.tech/badge/hmdriver2)](https://pepy.tech/project/hmdriver2)      
 
 
-> 写这个项目前github上已有个叫`hmdriver`的项目，但它是侵入式（需要提前在手机端安装一个testRunner app）；另外鸿蒙官方提供的hypium自动化框架，使用较为复杂，依赖繁杂。于是决定重写一套。
+> **📢 重要通知：**  
+> 
+> **由于原项目的维护模式已变更，本仓库（当前项目）将接替成为核心维护分支。会尽量保持更新（包括功能改进、Bug修复等）。**
 
 
 **hmdriver2** 是一款支持`HarmonyOS NEXT`系统的UI自动化框架，**无侵入式**，提供应用管理，UI操作，元素定位等功能，轻量高效，上手简单，快速实现鸿蒙应用自动化测试需求。

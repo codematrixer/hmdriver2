@@ -1,26 +1,40 @@
 # -*- coding: utf-8 -*-
 
 import math
-from typing import List, Union
+from typing import List, Union, Optional, Tuple, Callable, Any
+
 from . import logger
-from .utils import delay
 from .driver import Driver
-from .proto import HypiumResponse, Point
 from .exception import InjectGestureError
+from .proto import HypiumResponse, Point
+from .utils import delay
+
+# 手势采样时间常量（毫秒）
+SAMPLE_TIME_MIN = 10      # 最小采样时间
+SAMPLE_TIME_NORMAL = 50   # 正常采样时间
+SAMPLE_TIME_MAX = 100     # 最大采样时间
+
+# 手势步骤类型常量
+STEP_TYPE_START = "start"  # 开始手势
+STEP_TYPE_MOVE = "move"    # 移动手势
+STEP_TYPE_PAUSE = "pause"  # 暂停手势
 
 
 class _Gesture:
-    SAMPLE_TIME_MIN = 10
-    SAMPLE_TIME_NORMAL = 50
-    SAMPLE_TIME_MAX = 100
+    """
+    手势操作类
+    
+    提供了创建和执行复杂手势操作的功能，包括点击、滑动、暂停等。
+    通过链式调用可以组合多个手势步骤。
+    """
 
-    def __init__(self, d: Driver, sampling_ms=50):
+    def __init__(self, d: Driver, sampling_ms: int = SAMPLE_TIME_NORMAL):
         """
-        Initialize a gesture object.
-
+        初始化手势对象
+        
         Args:
-            d (Driver): The driver object to interact with.
-            sampling_ms (int): Sampling time for gesture operation points in milliseconds. Default is 50.
+            d: Driver 实例，用于与设备交互
+            sampling_ms: 手势操作点的采样时间（毫秒），默认为 50
         """
         self.d = d
         self.steps: List[GestureStep] = []
@@ -28,74 +42,86 @@ class _Gesture:
 
     def _validate_sampling_time(self, sampling_time: int) -> int:
         """
-        Validate the input sampling time.
-
+        验证采样时间是否在有效范围内
+        
         Args:
-            sampling_time (int): The given sampling time.
-
+            sampling_time: 给定的采样时间
+            
         Returns:
-            int: Valid sampling time within allowed range.
+            int: 有效范围内的采样时间
         """
-        if _Gesture.SAMPLE_TIME_MIN <= sampling_time <= _Gesture.SAMPLE_TIME_MAX:
+        if SAMPLE_TIME_MIN <= sampling_time <= SAMPLE_TIME_MAX:
             return sampling_time
-        return _Gesture.SAMPLE_TIME_NORMAL
+        return SAMPLE_TIME_NORMAL
 
-    def _release(self):
+    def _release(self) -> None:
+        """清空手势步骤列表"""
         self.steps = []
 
     def start(self, x: Union[int, float], y: Union[int, float], interval: float = 0.5) -> '_Gesture':
         """
-        Start gesture operation.
-
+        开始手势操作
+        
         Args:
-            x: oordinate as a percentage or absolute value.
-            y: coordinate as a percentage or absolute value.
-            interval (float, optional): Duration to hold at start position in seconds. Default is 0.5.
-
+            x: X 坐标，可以是百分比（0-1）或绝对值
+            y: Y 坐标，可以是百分比（0-1）或绝对值
+            interval: 在起始位置停留的时间（秒），默认为 0.5
+            
         Returns:
-            Gesture: Self instance to allow method chaining.
+            _Gesture: 当前实例，支持链式调用
+            
+        Raises:
+            InjectGestureError: 手势已经开始时抛出
         """
         self._ensure_can_start()
-        self._add_step(x, y, "start", interval)
+        self._add_step(x, y, STEP_TYPE_START, interval)
         return self
 
     def move(self, x: Union[int, float], y: Union[int, float], interval: float = 0.5) -> '_Gesture':
         """
-        Move to specified position.
-
+        移动到指定位置
+        
         Args:
-            x: coordinate as a percentage or absolute value.
-            y: coordinate as a percentage or absolute value.
-            interval (float, optional): Duration of move in seconds. Default is 0.5.
-
+            x: X 坐标，可以是百分比（0-1）或绝对值
+            y: Y 坐标，可以是百分比（0-1）或绝对值
+            interval: 移动的持续时间（秒），默认为 0.5
+            
         Returns:
-            Gesture: Self instance to allow method chaining.
+            _Gesture: 当前实例，支持链式调用
+            
+        Raises:
+            InjectGestureError: 手势未开始时抛出
         """
         self._ensure_started()
-        self._add_step(x, y, "move", interval)
+        self._add_step(x, y, STEP_TYPE_MOVE, interval)
         return self
 
     def pause(self, interval: float = 1) -> '_Gesture':
         """
-        Pause at current position for specified duration.
-
+        在当前位置暂停指定时间
+        
         Args:
-            interval (float, optional): Duration to pause in seconds. Default is 1.
-
+            interval: 暂停时间（秒），默认为 1
+            
         Returns:
-            Gesture: Self instance to allow method chaining.
+            _Gesture: 当前实例，支持链式调用
+            
+        Raises:
+            InjectGestureError: 手势未开始时抛出
         """
         self._ensure_started()
         pos = self.steps[-1].pos
-        self.steps.append(GestureStep(pos, "pause", interval))
+        self.steps.append(GestureStep(pos, STEP_TYPE_PAUSE, interval))
         return self
 
     @delay
-    def action(self):
+    def action(self) -> None:
         """
-        Execute the gesture action.
+        执行手势操作
+        
+        该方法会将所有已定义的手势步骤转换为触摸事件并发送到设备
         """
-        logger.info(f">>>Gesture steps: {self.steps}")
+        logger.info(f">>>执行手势步骤: {self.steps}")
         total_points = self._calculate_total_points()
 
         pointer_matrix = self._create_pointer_matrix(total_points)
@@ -105,76 +131,82 @@ class _Gesture:
 
         self._release()
 
-    def _create_pointer_matrix(self, total_points: int):
+    def _create_pointer_matrix(self, total_points: int) -> Any:
         """
-        Create a pointer matrix for the gesture.
-
+        创建手势操作的指针矩阵
+        
         Args:
-            total_points (int): Total number of points.
-
+            total_points: 总点数
+            
         Returns:
-            PointerMatrix: Pointer matrix object.
+            Any: 指针矩阵对象
         """
-        fingers = 1
+        fingers = 1  # 当前仅支持单指操作
         api = "PointerMatrix.create"
         data: HypiumResponse = self.d._client.invoke(api, this=None, args=[fingers, total_points])
         return data.result
 
-    def _inject_pointer_actions(self, pointer_matrix):
+    def _inject_pointer_actions(self, pointer_matrix: Any) -> None:
         """
-        Inject pointer actions into the driver.
-
+        将指针操作注入到设备
+        
         Args:
-            pointer_matrix (PointerMatrix): Pointer matrix to inject.
+            pointer_matrix: 要注入的指针矩阵
         """
         api = "Driver.injectMultiPointerAction"
         self.d._client.invoke(api, args=[pointer_matrix, 2000])
 
-    def _add_step(self, x: int, y: int, step_type: str, interval: float):
+    def _add_step(self, x: Union[int, float], y: Union[int, float], step_type: str, interval: float) -> None:
         """
-        Add a step to the gesture.
-
+        添加手势步骤
+        
         Args:
-            x (int): x-coordinate of the point.
-            y (int): y-coordinate of the point.
-            step_type (str): Type of step ("start", "move", or "pause").
-            interval (float): Interval duration in seconds.
+            x: X 坐标
+            y: Y 坐标
+            step_type: 步骤类型（"start"、"move" 或 "pause"）
+            interval: 时间间隔（秒）
         """
         point: Point = self.d._to_abs_pos(x, y)
         step = GestureStep(point.to_tuple(), step_type, interval)
         self.steps.append(step)
 
-    def _ensure_can_start(self):
+    def _ensure_can_start(self) -> None:
         """
-        Ensure that the gesture can start.
+        确保手势可以开始
+        
+        Raises:
+            InjectGestureError: 手势已经开始时抛出
         """
         if self.steps:
-            raise InjectGestureError("Can't start gesture twice")
+            raise InjectGestureError("不能重复开始手势")
 
-    def _ensure_started(self):
+    def _ensure_started(self) -> None:
         """
-        Ensure that the gesture has started.
+        确保手势已经开始
+        
+        Raises:
+            InjectGestureError: 手势未开始时抛出
         """
         if not self.steps:
-            raise InjectGestureError("Please call gesture.start first")
+            raise InjectGestureError("请先调用 gesture.start")
 
-    def _generate_points(self, pointer_matrix, total_points):
+    def _generate_points(self, pointer_matrix: Any, total_points: int) -> None:
         """
-        Generate points for the pointer matrix.
-
+        为指针矩阵生成点
+        
         Args:
-            pointer_matrix (PointerMatrix): Pointer matrix to populate.
-            total_points (int): Total points to generate.
+            pointer_matrix: 要填充的指针矩阵
+            total_points: 要生成的总点数
         """
-
-        def set_point(point_index: int, point: Point, interval: int = None):
+        # 定义设置点的内部函数
+        def set_point(point_index: int, point: Point, interval: Optional[int] = None) -> None:
             """
-            Set a point in the pointer matrix.
-
+            在指针矩阵中设置点
+            
             Args:
-                point_index (int): Index of the point.
-                point (Point): The point object.
-                interval (int, optional): Interval duration.
+                point_index: 点的索引
+                point: 点对象
+                interval: 时间间隔（可选）
             """
             if interval is not None:
                 point.x += 65536 * interval
@@ -183,30 +215,33 @@ class _Gesture:
 
         point_index = 0
 
+        # 处理所有手势步骤
         for index, step in enumerate(self.steps):
-            if step.type == "start":
+            if step.type == STEP_TYPE_START:
                 point_index = self._generate_start_point(step, point_index, set_point)
-            elif step.type == "move":
+            elif step.type == STEP_TYPE_MOVE:
                 point_index = self._generate_move_points(index, step, point_index, set_point)
-            elif step.type == "pause":
+            elif step.type == STEP_TYPE_PAUSE:
                 point_index = self._generate_pause_points(step, point_index, set_point)
 
+        # 填充剩余点
         step = self.steps[-1]
         while point_index < total_points:
             set_point(point_index, Point(*step.pos))
             point_index += 1
 
-    def _generate_start_point(self, step, point_index, set_point):
+    def _generate_start_point(self, step: 'GestureStep', point_index: int,
+                             set_point: Callable) -> int:
         """
-        Generate start points.
-
+        生成起始点
+        
         Args:
-            step (GestureStep): Gesture step.
-            point_index (int): Current point index.
-            set_point (function): Function to set the point in pointer matrix.
-
+            step: 手势步骤
+            point_index: 当前点索引
+            set_point: 设置点的函数
+            
         Returns:
-            int: Updated point index.
+            int: 更新后的点索引
         """
         set_point(point_index, Point(*step.pos), step.interval)
         point_index += 1
@@ -214,18 +249,19 @@ class _Gesture:
         set_point(point_index, Point(*pos))
         return point_index + 1
 
-    def _generate_move_points(self, index, step, point_index, set_point):
+    def _generate_move_points(self, index: int, step: 'GestureStep',
+                             point_index: int, set_point: Callable) -> int:
         """
-        Generate move points.
-
+        生成移动点
+        
         Args:
-            index (int): Step index.
-            step (GestureStep): Gesture step.
-            point_index (int): Current point index.
-            set_point (function): Function to set the point in pointer matrix.
-
+            index: 步骤索引
+            step: 手势步骤
+            point_index: 当前点索引
+            set_point: 设置点的函数
+            
         Returns:
-            int: Updated point index.
+            int: 更新后的点索引
         """
         last_step = self.steps[index - 1]
         offset_x = step.pos[0] - last_step.pos[0]
@@ -233,6 +269,10 @@ class _Gesture:
         distance = int(math.sqrt(offset_x ** 2 + offset_y ** 2))
         interval_ms = step.interval
         cur_steps = self._calculate_move_step_points(distance, interval_ms)
+
+        # 避免除零错误
+        if cur_steps <= 0:
+            cur_steps = 1
 
         step_x = int(offset_x / cur_steps)
         step_y = int(offset_y / cur_steps)
@@ -246,55 +286,57 @@ class _Gesture:
             point_index += 1
         return point_index
 
-    def _generate_pause_points(self, step, point_index, set_point):
+    def _generate_pause_points(self, step: 'GestureStep', point_index: int,
+                              set_point: Callable) -> int:
         """
-        Generate pause points.
-
+        生成暂停点
+        
         Args:
-            step (GestureStep): Gesture step.
-            point_index (int): Current point index.
-            set_point (function): Function to set the point in pointer matrix.
-
+            step: 手势步骤
+            point_index: 当前点索引
+            set_point: 设置点的函数
+            
         Returns:
-            int: Updated point index.
+            int: 更新后的点索引
         """
-        points = int(step.interval / self.sampling_ms)
+        # 计算需要的点数
+        points = max(1, int(step.interval / self.sampling_ms))
         for _ in range(points):
-            set_point(point_index, Point(*step.pos), int(step.interval / self.sampling_ms))
+            set_point(point_index, Point(*step.pos), int(step.interval / points))
             point_index += 1
-        pos = step.pos[0] + 3, step.pos[1]
+        pos = step.pos[0] + 3, step.pos[1]  # 微小移动以触发事件
         set_point(point_index, Point(*pos))
         return point_index + 1
 
     def _calculate_total_points(self) -> int:
         """
-        Calculate the total number of points needed for the gesture.
-
+        计算手势所需的总点数
+        
         Returns:
-            int: Total points.
+            int: 总点数
         """
         total_points = 0
         for index, step in enumerate(self.steps):
-            if step.type == "start":
+            if step.type == STEP_TYPE_START:
                 total_points += 2
-            elif step.type == "move":
-                total_points += self._calculate_move_step_points(
-                    *self._calculate_move_distance(step, index))
-            elif step.type == "pause":
-                points = int(step.interval / self.sampling_ms)
+            elif step.type == STEP_TYPE_MOVE:
+                distance, interval_ms = self._calculate_move_distance(step, index)
+                total_points += self._calculate_move_step_points(distance, interval_ms)
+            elif step.type == STEP_TYPE_PAUSE:
+                points = max(1, int(step.interval / self.sampling_ms))
                 total_points += points + 1
         return total_points
 
-    def _calculate_move_distance(self, step, index):
+    def _calculate_move_distance(self, step: 'GestureStep', index: int) -> Tuple[int, float]:
         """
-        Calculate move distance and interval.
-
+        计算移动距离和时间间隔
+        
         Args:
-            step (GestureStep): Gesture step.
-            index (int): Step index.
-
+            step: 手势步骤
+            index: 步骤索引
+            
         Returns:
-            tuple: Tuple (distance, interval_ms).
+            Tuple[int, float]: (距离, 时间间隔(毫秒))
         """
         last_step = self.steps[index - 1]
         offset_x = step.pos[0] - last_step.pos[0]
@@ -305,39 +347,45 @@ class _Gesture:
 
     def _calculate_move_step_points(self, distance: int, interval_ms: float) -> int:
         """
-        Calculate the number of move step points based on distance and time.
-
+        根据距离和时间计算移动步骤点数
+        
         Args:
-            distance (int): Distance to move.
-            interval_ms (float): Move duration in milliseconds.
-
+            distance: 移动距离
+            interval_ms: 移动持续时间（毫秒）
+            
         Returns:
-            int: Number of move step points.
+            int: 移动步骤点数
         """
         if interval_ms < self.sampling_ms or distance < 1:
             return 1
         nums = interval_ms / self.sampling_ms
-        return distance if nums > distance else int(nums)
+        return min(distance, int(nums))
 
 
 class GestureStep:
-    """Class to store each step of a gesture, not to be used directly, use via Gesture class"""
+    """
+    手势步骤类
+    
+    存储手势的每个步骤，不直接使用，通过 Gesture 类使用
+    """
 
-    def __init__(self, pos: tuple, step_type: str, interval: float):
+    def __init__(self, pos: Tuple[int, int], step_type: str, interval: float):
         """
-        Initialize a gesture step.
-
+        初始化手势步骤
+        
         Args:
-            pos (tuple): Tuple containing x and y coordinates.
-            step_type (str): Type of step ("start", "move", "pause").
-            interval (float): Interval duration in seconds.
+            pos: 包含 x 和 y 坐标的元组
+            step_type: 步骤类型（"start"、"move"、"pause"）
+            interval: 时间间隔（秒）
         """
         self.pos = pos[0], pos[1]
-        self.interval = int(interval * 1000)
+        self.interval = int(interval * 1000)  # 转换为毫秒
         self.type = step_type
 
-    def __repr__(self):
+    def __repr__(self) -> str:
+        """返回手势步骤的字符串表示"""
         return f"GestureStep(pos=({self.pos[0]}, {self.pos[1]}), type='{self.type}', interval={self.interval})"
 
-    def __str__(self):
+    def __str__(self) -> str:
+        """返回手势步骤的字符串表示"""
         return self.__repr__()
