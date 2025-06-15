@@ -27,3 +27,4 @@ poetry.lock
 hypium_api*.md
 example-dev.py
 test*.mp4
+/tests/
