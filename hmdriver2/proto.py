@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
 import json
-from enum import Enum
-from typing import Union, List
 from dataclasses import dataclass, asdict
+from enum import Enum
+from typing import Union, List, Dict
 
 
 @dataclass
@@ -64,8 +64,8 @@ class HypiumResponse:
     {"result":null,"exception":"Can not connect to AAMS, RET_ERR_CONNECTION_EXIST"}
     {"exception":{"code":401,"message":"(PreProcessing: APiCallInfoChecker)Illegal argument count"}}
     """
-    result: Union[List, bool, str, None] = None
-    exception: Union[List, bool, str, None] = None
+    result: Union[List, Dict, bool, str, None] = None
+    exception: Union[List, Dict, bool, str, None] = None
 
 
 @dataclass
@@ -160,51 +160,51 @@ class KeyCode(Enum):
     MUTE = 23  # 话筒静音键
     BRIGHTNESS_UP = 40  # 亮度调节按键调亮
     BRIGHTNESS_DOWN = 41  # 亮度调节按键调暗
-    NUM_0 = 2000  # 按键’0’
-    NUM_1 = 2001  # 按键’1’
-    NUM_2 = 2002  # 按键’2’
-    NUM_3 = 2003  # 按键’3’
-    NUM_4 = 2004  # 按键’4’
-    NUM_5 = 2005  # 按键’5’
-    NUM_6 = 2006  # 按键’6’
-    NUM_7 = 2007  # 按键’7’
-    NUM_8 = 2008  # 按键’8’
-    NUM_9 = 2009  # 按键’9’
-    STAR = 2010  # 按键’*’
-    POUND = 2011  # 按键’#’
+    NUM_0 = 2000  # 按键'0'
+    NUM_1 = 2001  # 按键'1'
+    NUM_2 = 2002  # 按键'2'
+    NUM_3 = 2003  # 按键'3'
+    NUM_4 = 2004  # 按键'4'
+    NUM_5 = 2005  # 按键'5'
+    NUM_6 = 2006  # 按键'6'
+    NUM_7 = 2007  # 按键'7'
+    NUM_8 = 2008  # 按键'8'
+    NUM_9 = 2009  # 按键'9'
+    STAR = 2010  # 按键'*'
+    POUND = 2011  # 按键'#'
     DPAD_UP = 2012  # 导航键向上
     DPAD_DOWN = 2013  # 导航键向下
     DPAD_LEFT = 2014  # 导航键向左
     DPAD_RIGHT = 2015  # 导航键向右
     DPAD_CENTER = 2016  # 导航键确定键
-    A = 2017  # 按键’A’
-    B = 2018  # 按键’B’
-    C = 2019  # 按键’C’
-    D = 2020  # 按键’D’
-    E = 2021  # 按键’E’
-    F = 2022  # 按键’F’
-    G = 2023  # 按键’G’
-    H = 2024  # 按键’H’
-    I = 2025  # 按键’I’
-    J = 2026  # 按键’J’
-    K = 2027  # 按键’K’
-    L = 2028  # 按键’L’
-    M = 2029  # 按键’M’
-    N = 2030  # 按键’N’
-    O = 2031  # 按键’O’
-    P = 2032  # 按键’P’
-    Q = 2033  # 按键’Q’
-    R = 2034  # 按键’R’
-    S = 2035  # 按键’S’
-    T = 2036  # 按键’T’
-    U = 2037  # 按键’U’
-    V = 2038  # 按键’V’
-    W = 2039  # 按键’W’
-    X = 2040  # 按键’X’
-    Y = 2041  # 按键’Y’
-    Z = 2042  # 按键’Z’
-    COMMA = 2043  # 按键’,’
-    PERIOD = 2044  # 按键’.’
+    A = 2017  # 按键'A'
+    B = 2018  # 按键'B'
+    C = 2019  # 按键'C'
+    D = 2020  # 按键'D'
+    E = 2021  # 按键'E'
+    F = 2022  # 按键'F'
+    G = 2023  # 按键'G'
+    H = 2024  # 按键'H'
+    I = 2025  # 按键'I'
+    J = 2026  # 按键'J'
+    K = 2027  # 按键'K'
+    L = 2028  # 按键'L'
+    M = 2029  # 按键'M'
+    N = 2030  # 按键'N'
+    O = 2031  # 按键'O'
+    P = 2032  # 按键'P'
+    Q = 2033  # 按键'Q'
+    R = 2034  # 按键'R'
+    S = 2035  # 按键'S'
+    T = 2036  # 按键'T'
+    U = 2037  # 按键'U'
+    V = 2038  # 按键'V'
+    W = 2039  # 按键'W'
+    X = 2040  # 按键'X'
+    Y = 2041  # 按键'Y'
+    Z = 2042  # 按键'Z'
+    COMMA = 2043  # 按键','
+    PERIOD = 2044  # 按键'.'
     ALT_LEFT = 2045  # 左Alt键
     ALT_RIGHT = 2046  # 右Alt键
     SHIFT_LEFT = 2047  # 左Shift键
@@ -216,17 +216,17 @@ class KeyCode(Enum):
     ENVELOPE = 2053  # 电子邮件功能键，此键用于启动电子邮件应用程序。
     ENTER = 2054  # 回车键
     DEL = 2055  # 退格键
-    GRAVE = 2056  # 按键’`’
-    MINUS = 2057  # 按键’-’
-    EQUALS = 2058  # 按键’=’
-    LEFT_BRACKET = 2059  # 按键’[’
-    RIGHT_BRACKET = 2060  # 按键’]’
-    BACKSLASH = 2061  # 按键’\’
-    SEMICOLON = 2062  # 按键’;’
-    APOSTROPHE = 2063  # 按键’‘’(单引号)
-    SLASH = 2064  # 按键’/’
-    AT = 2065  # 按键’@’
-    PLUS = 2066  # 按键’+’
+    GRAVE = 2056  # 按键'`'
+    MINUS = 2057  # 按键'-'
+    EQUALS = 2058  # 按键'='
+    LEFT_BRACKET = 2059  # 按键'['
+    RIGHT_BRACKET = 2060  # 按键']'
+    BACKSLASH = 2061  # 按键'\'
+    SEMICOLON = 2062  # 按键';'
+    APOSTROPHE = 2063  # 按键'''
+    SLASH = 2064  # 按键'/'
+    AT = 2065  # 按键'@'
+    PLUS = 2066  # 按键'+'
     MENU = 2067  # 菜单键
     PAGE_UP = 2068  # 向上翻页键
     PAGE_DOWN = 2069  # 向下翻页键
@@ -250,39 +250,39 @@ class KeyCode(Enum):
     MEDIA_CLOSE = 2087  # 多媒体键关闭
     MEDIA_EJECT = 2088  # 多媒体键弹出
     MEDIA_RECORD = 2089  # 多媒体键录音
-    F1 = 2090  # 按键’F1’
-    F2 = 2091  # 按键’F2’
-    F3 = 2092  # 按键’F3’
-    F4 = 2093  # 按键’F4’
-    F5 = 2094  # 按键’F5’
-    F6 = 2095  # 按键’F6’
-    F7 = 2096  # 按键’F7’
-    F8 = 2097  # 按键’F8’
-    F9 = 2098  # 按键’F9’
-    F10 = 2099  # 按键’F10’
-    F11 = 2100  # 按键’F11’
-    F12 = 2101  # 按键’F12’
+    F1 = 2090  # 按键'F1'
+    F2 = 2091  # 按键'F2'
+    F3 = 2092  # 按键'F3'
+    F4 = 2093  # 按键'F4'
+    F5 = 2094  # 按键'F5'
+    F6 = 2095  # 按键'F6'
+    F7 = 2096  # 按键'F7'
+    F8 = 2097  # 按键'F8'
+    F9 = 2098  # 按键'F9'
+    F10 = 2099  # 按键'F10'
+    F11 = 2100  # 按键'F11'
+    F12 = 2101  # 按键'F12'
     NUM_LOCK = 2102  # 小键盘锁
-    NUMPAD_0 = 2103  # 小键盘按键’0’
-    NUMPAD_1 = 2104  # 小键盘按键’1’
-    NUMPAD_2 = 2105  # 小键盘按键’2’
-    NUMPAD_3 = 2106  # 小键盘按键’3’
-    NUMPAD_4 = 2107  # 小键盘按键’4’
-    NUMPAD_5 = 2108  # 小键盘按键’5’
-    NUMPAD_6 = 2109  # 小键盘按键’6’
-    NUMPAD_7 = 2110  # 小键盘按键’7’
-    NUMPAD_8 = 2111  # 小键盘按键’8’
-    NUMPAD_9 = 2112  # 小键盘按键’9’
-    NUMPAD_DIVIDE = 2113  # 小键盘按键’/’
-    NUMPAD_MULTIPLY = 2114  # 小键盘按键’*’
-    NUMPAD_SUBTRACT = 2115  # 小键盘按键’-’
-    NUMPAD_ADD = 2116  # 小键盘按键’+’
-    NUMPAD_DOT = 2117  # 小键盘按键’.’
-    NUMPAD_COMMA = 2118  # 小键盘按键’,’
+    NUMPAD_0 = 2103  # 小键盘按键'0'
+    NUMPAD_1 = 2104  # 小键盘按键'1'
+    NUMPAD_2 = 2105  # 小键盘按键'2'
+    NUMPAD_3 = 2106  # 小键盘按键'3'
+    NUMPAD_4 = 2107  # 小键盘按键'4'
+    NUMPAD_5 = 2108  # 小键盘按键'5'
+    NUMPAD_6 = 2109  # 小键盘按键'6'
+    NUMPAD_7 = 2110  # 小键盘按键'7'
+    NUMPAD_8 = 2111  # 小键盘按键'8'
+    NUMPAD_9 = 2112  # 小键盘按键'9'
+    NUMPAD_DIVIDE = 2113  # 小键盘按键'/'
+    NUMPAD_MULTIPLY = 2114  # 小键盘按键'*'
+    NUMPAD_SUBTRACT = 2115  # 小键盘按键'-'
+    NUMPAD_ADD = 2116  # 小键盘按键'+'
+    NUMPAD_DOT = 2117  # 小键盘按键'.'
+    NUMPAD_COMMA = 2118  # 小键盘按键','
     NUMPAD_ENTER = 2119  # 小键盘按键回车
-    NUMPAD_EQUALS = 2120  # 小键盘按键’=’
-    NUMPAD_LEFT_PAREN = 2121  # 小键盘按键’(’
-    NUMPAD_RIGHT_PAREN = 2122  # 小键盘按键’)’
+    NUMPAD_EQUALS = 2120  # 小键盘按键'='
+    NUMPAD_LEFT_PAREN = 2121  # 小键盘按键'('
+    NUMPAD_RIGHT_PAREN = 2122  # 小键盘按键')'
     VIRTUAL_MULTITASK = 2210  # 虚拟多任务键
     SLEEP = 2600  # 睡眠键
     ZENKAKU_HANKAKU = 2601  # 日文全宽/半宽键
@@ -431,18 +431,18 @@ class KeyCode(Enum):
     EJECTCLOSECD = 2813  # 弹出CD键
     ISO = 2814  # ISO键
     MOVE = 2815  # 移动键
-    F13 = 2816  # 按键’F13’
-    F14 = 2817  # 按键’F14’
-    F15 = 2818  # 按键’F15’
-    F16 = 2819  # 按键’F16’
-    F17 = 2820  # 按键’F17’
-    F18 = 2821  # 按键’F18’
-    F19 = 2822  # 按键’F19’
-    F20 = 2823  # 按键’F20’
-    F21 = 2824  # 按键’F21’
-    F22 = 2825  # 按键’F22’
-    F23 = 2826  # 按键’F23’
-    F24 = 2827  # 按键’F24’
+    F13 = 2816  # 按键'F13'
+    F14 = 2817  # 按键'F14'
+    F15 = 2818  # 按键'F15'
+    F16 = 2819  # 按键'F16'
+    F17 = 2820  # 按键'F17'
+    F18 = 2821  # 按键'F18'
+    F19 = 2822  # 按键'F19'
+    F20 = 2823  # 按键'F20'
+    F21 = 2824  # 按键'F21'
+    F22 = 2825  # 按键'F22'
+    F23 = 2826  # 按键'F23'
+    F24 = 2827  # 按键'F24'
     PROG3 = 2828  # 程序键3
     PROG4 = 2829  # 程序键4
     DASHBOARD = 2830  # 仪表板

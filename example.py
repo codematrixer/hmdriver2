@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
 import time
+
 from hmdriver2.driver import Driver
 from hmdriver2.proto import DeviceInfo, KeyCode, ComponentData, DisplayRotation
-
 
 # New driver
 d = Driver("FMR0223C13000649")
@@ -135,3 +135,5 @@ d.xpath('//*[@text="showDialog"]').click()
 d.xpath('//*[@text="showDialog"]').click_if_exists()
 d.xpath('//root[1]/Row[1]/Column[1]/Row[1]/Button[3]').click()
 d.xpath('//*[@text="showDialog"]').input_text("xxx")
+d.xpath('//*[@text="showDialog"]').text()
+d.xpath('//*[@text="showDialog"]').clickable()
