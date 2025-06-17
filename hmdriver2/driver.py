@@ -342,22 +342,20 @@ class Driver:
         """
         self.hdc.send_file(lpath, rpath)
 
-    def screenshot(self, path: str) -> str:
+    def screenshot(self, path: str, method: str = "snapshot_display") -> str:
         """
         Take a screenshot of the device display.
 
         Args:
             path (str): The local path to save the screenshot.
+            method (str): The screenshot method to use. Options are:
+                          - "snapshot_display" (default, recommended for better performance)
+                          - "screenCap" (alternative method, higher quality but slower).
 
         Returns:
             str: The path where the screenshot is saved.
         """
-        _uuid = uuid.uuid4().hex
-        _tmp_path = f"/data/local/tmp/_tmp_{_uuid}.jpeg"
-        self.shell(f"snapshot_display -f {_tmp_path}")
-        self.pull_file(_tmp_path, path)
-        self.shell(f"rm -rf {_tmp_path}")  # remove local path
-        return path
+        return self.hdc.screenshot(path, method=method)
 
     def shell(self, cmd) -> CommandResult:
         return self.hdc.shell(cmd)

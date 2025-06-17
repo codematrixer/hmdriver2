@@ -51,6 +51,13 @@ def test_uninstall_app(d):
 
 
 def test_list_apps(d):
+    # Assert that no item in the list starts with "ID:"
+    assert not any(item.startswith("ID:") for item in d.list_apps())
+
+    # Assert that no empty strings are in the list
+    assert "" not in d.list_apps()
+
+    # Assert that "com.samples.test.uitest" is in the list
     assert "com.samples.test.uitest" in d.list_apps()
 
 
@@ -123,9 +130,15 @@ def test_push_file(d):
     d.push_file(lpath, rpath)
 
 
-def test_screenshot(d) -> str:
+def test_screenshot(d):
     lpath = "./test.png"
     d.screenshot(lpath)
+    assert os.path.exists(lpath)
+
+
+def test_screenshot_by_screen_cap(d):
+    lpath = "./test_screen_cap.png"
+    d.screenshot(lpath, method='screenCap')
     assert os.path.exists(lpath)
 
 
@@ -176,7 +189,9 @@ def test_toast(d):
 
 def test_gesture(d):
     d(id="drag").click()
-    d.gesture.start(630, 984, interval=1).move(0.2, 0.4, interval=.5).pause(interval=1).move(0.5, 0.6, interval=.5).pause(interval=1).action()
+    d.gesture.start(630, 984, interval=1).move(0.2, 0.4, interval=.5).pause(interval=1).move(0.5, 0.6,
+                                                                                             interval=.5).pause(
+        interval=1).action()
     d.go_back()
 
 
@@ -213,7 +228,7 @@ def test_screenrecord2(d):
 def test_xpath(d):
     d.force_start_app("com.samples.test.uitest", "EntryAbility")
 
-    xpath1 = '//root[1]/Row[1]/Column[1]/Row[1]/Button[3]'   # showToast
+    xpath1 = '//root[1]/Row[1]/Column[1]/Row[1]/Button[3]'  # showToast
     xpath2 = '//*[@text="showDialog"]'
 
     d.toast_watcher.start()

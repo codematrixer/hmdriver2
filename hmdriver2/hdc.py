@@ -142,7 +142,9 @@ class HdcWrapper:
     def list_apps(self) -> List[str]:
         result = self.shell("bm dump -a")
         raw = result.output.split('\n')
-        return [item.strip() for item in raw]
+        # Use regular expressions to filter out strings starting with 'ID:' and empty strings
+        # raw origin data: ['ID: 100:', 'cn.wps.mobileoffice.hap', '']
+        return [item.strip() for item in raw if item.strip() and not re.match(r'^ID:', item.strip())]
 
     def has_app(self, package_name: str) -> bool:
         data = self.shell("bm dump -a").output
@@ -260,12 +262,38 @@ class HdcWrapper:
     def input_text(self, x: int, y: int, text: str):
         self.shell(f"uitest uiInput inputText {x} {y} {text}")
 
-    def screenshot(self, path: str) -> str:
-        _uuid = uuid.uuid4().hex
-        _tmp_path = f"/data/local/tmp/_tmp_{_uuid}.jpeg"
-        self.shell(f"snapshot_display -f {_tmp_path}")
-        self.recv_file(_tmp_path, path)
-        self.shell(f"rm -rf {_tmp_path}")  # remove local path
+    def screenshot(self, path: str, method: str = "snapshot_display") -> str:
+        """
+        Take a screenshot using one of the two available methods.
+
+        Args:
+            path (str): The local path where the screenshot will be saved.
+            method (str): The screenshot method to use. Options are:
+                          - "snapshot_display" (default, recommended for better performance)
+                            This method is faster and more efficient, but the image quality is lower.
+                          - "screenCap" (alternative method)
+                            This method produces higher-quality images (5~20 times clearer), but it is slower.
+
+        Returns:
+            str: The local path where the screenshot is saved.
+        """
+        if method == "snapshot_display":
+            # Use the recommended method (snapshot_display)
+            _uuid = uuid.uuid4().hex
+            _tmp_path = f"/data/local/tmp/_tmp_{_uuid}.jpeg"
+            self.shell(f"snapshot_display -f {_tmp_path}")
+            self.recv_file(_tmp_path, path)
+            self.shell(f"rm -rf {_tmp_path}")
+        elif method == "screenCap":
+            # Use the alternative method (screenCap)
+            _uuid = uuid.uuid4().hex
+            _tmp_path = f"/data/local/tmp/{_uuid}.png"
+            self.shell(f"uitest screenCap -p {_tmp_path}")
+            self.recv_file(_tmp_path, path)
+            self.shell(f"rm -rf {_tmp_path}")
+        else:
+            raise ValueError(f"Invalid screenshot method: {method}. Use 'snapshot_display' or 'screenCap'.")
+
         return path
 
     def dump_hierarchy(self) -> Dict:
