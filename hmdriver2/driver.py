@@ -117,8 +117,11 @@ class Driver:
     def uninstall_app(self, package_name: str):
         self.hdc.uninstall(package_name)
 
-    def list_apps(self) -> List:
-        return self.hdc.list_apps()
+    def list_apps(self, include_system_apps: bool = False) -> List:
+        return self.hdc.list_apps(include_system_apps)
+
+    def app_version(self, bundle_name) -> Dict:
+        return self.hdc.app_version(bundle_name)
 
     def has_app(self, package_name: str) -> bool:
         return self.hdc.has_app(package_name)
@@ -484,3 +487,4 @@ class Driver:
         """
         from ._xpath import _XPath
         return _XPath(self)
+

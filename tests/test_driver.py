@@ -51,14 +51,40 @@ def test_uninstall_app(d):
 
 
 def test_list_apps(d):
+    apps = d.list_apps()
     # Assert that no item in the list starts with "ID:"
-    assert not any(item.startswith("ID:") for item in d.list_apps())
+    assert not any(item.startswith("ID:") for item in apps)
 
     # Assert that no empty strings are in the list
-    assert "" not in d.list_apps()
+    assert "" not in apps
 
     # Assert that "com.samples.test.uitest" is in the list
-    assert "com.samples.test.uitest" in d.list_apps()
+    assert "com.sogou.input" in apps
+    # assert "com.samples.test.uitest" in apps
+
+    # Test all apps (include system apps)
+    all_apps = d.list_apps(include_system_apps=True)
+
+    # Assert that "com.huawei.systemmanager" is in the list (system app)
+    assert "com.huawei.hmos.settings" in all_apps, "'com.huawei.hmos.settings' is not in the full apps list."
+
+    # Assert that "com.sogou.input" is also in the list
+    assert "com.sogou.input" in all_apps, "'com.sogou.input' is not in the full apps list."
+
+    # Assert that the total number of apps is greater than the number of third-party apps
+    assert len(all_apps) > len(apps), "Full apps list is not larger than third-party apps list."
+
+
+def test_app_version(d):
+    version_info = d.app_version('com.sogou.input')
+
+    # Assert that version_name and version_code exist in the returned dictionary
+    assert 'version_name' in version_info, "version_name is missing in the returned dictionary."
+    assert 'version_code' in version_info, "version_code is missing in the returned dictionary."
+
+    # Assert specific values
+    assert version_info['version_name'] == "1.0.4", "version_name does not match expected value."
+    assert version_info['version_code'] == 5, "version_code does not match expected value."
 
 
 def test_has_app(d):

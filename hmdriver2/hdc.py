@@ -6,7 +6,7 @@ import shlex
 import re
 import os
 import subprocess
-from typing import Union, List, Dict, Tuple
+from typing import Union, List, Dict, Tuple, Optional
 
 from . import logger
 from .utils import FreePort
@@ -139,12 +139,64 @@ class HdcWrapper:
             raise HdcError("HDC install error", result.error)
         return result
 
-    def list_apps(self) -> List[str]:
-        result = self.shell("bm dump -a")
+    def list_apps(self, include_system_apps: bool = False) -> List[str]:
+        """
+        List installed applications on the device. (Lazy loading, default: third-party apps)
+
+        Args:
+            include_system_apps (bool): If True, include system apps in the list.
+                                        If False, only list third-party apps.
+
+        Returns:
+            List[str]: A list of application package names.
+
+        Note:
+        - When include_system_apps is False, the list typically contains around 50 third-party apps.
+        - When include_system_apps is True, the list typically contains around 200 apps in total.
+        """
+        # Construct the shell command based on the include_system_apps flag
+        if include_system_apps:
+            command = "bm dump -a"
+        else:
+            command = "bm dump -a | grep -v 'com.huawei'"
+
+        # Execute the shell command
+        result = self.shell(command)
         raw = result.output.split('\n')
-        # Use regular expressions to filter out strings starting with 'ID:' and empty strings
-        # raw origin data: ['ID: 100:', 'cn.wps.mobileoffice.hap', '']
+
+        # Filter out strings starting with 'ID:' and empty strings
         return [item.strip() for item in raw if item.strip() and not re.match(r'^ID:', item.strip())]
+
+    def app_version(self, bundlename: str) -> Dict[str, Optional[str]]:
+        """
+        Get the version information of an app installed on the device.
+
+        Args:
+            bundlename (str): The bundle name of the app.
+
+        Returns:
+            dict: A dictionary containing the version information:
+                  - "versionName": The version name of the app.
+                  - "versionCode": The version code of the app.
+        """
+        result = _execute_command(f"{self.hdc_prefix} -t {self.serial} shell bm dump -n {bundlename} | grep '\"versionCode\":\\|versionName\"'")
+
+        matches = re.findall(r'"versionCode":\s*(\d+),\s*"versionName":\s*"([^"]*)"', result.output)
+        if not matches:
+            return dict(
+                version_name='',
+                version_code=''
+            )
+
+        # Select the last match
+        version_code, version_name = matches[-1]
+        version_code = int(version_code) if version_code.isdigit() else None
+        version_name = version_name if version_name != "" else None
+
+        return dict(
+            version_name=version_name,
+            version_code=version_code
+        )
 
     def has_app(self, package_name: str) -> bool:
         data = self.shell("bm dump -a").output
