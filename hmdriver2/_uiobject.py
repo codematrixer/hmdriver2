@@ -182,11 +182,13 @@ class UiObject:
     @property
     def bounds(self) -> Bounds:
         _raw = self.__operate("Component.getBounds")
+        _raw = {k: v for k, v in _raw.items() if k in {"bottom", "left", "right", "top"}}
         return Bounds(**_raw)
 
     @property
     def boundsCenter(self) -> Point:
         _raw = self.__operate("Component.getBoundsCenter")
+        _raw = {k: v for k, v in _raw.items() if k in {"x", "y"}}
         return Point(**_raw)
 
     @property
