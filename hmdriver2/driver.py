@@ -117,8 +117,11 @@ class Driver:
     def uninstall_app(self, package_name: str):
         self.hdc.uninstall(package_name)
 
-    def list_apps(self) -> List:
-        return self.hdc.list_apps()
+    def list_apps(self, include_system_apps: bool = False) -> List:
+        return self.hdc.list_apps(include_system_apps)
+
+    def app_version(self, bundle_name) -> Dict:
+        return self.hdc.app_version(bundle_name)
 
     def has_app(self, package_name: str) -> bool:
         return self.hdc.has_app(package_name)
@@ -342,22 +345,20 @@ class Driver:
         """
         self.hdc.send_file(lpath, rpath)
 
-    def screenshot(self, path: str) -> str:
+    def screenshot(self, path: str, method: str = "snapshot_display") -> str:
         """
         Take a screenshot of the device display.
 
         Args:
             path (str): The local path to save the screenshot.
+            method (str): The screenshot method to use. Options are:
+                          - "snapshot_display" (default, recommended for better performance)
+                          - "screenCap" (alternative method, higher quality but slower).
 
         Returns:
             str: The path where the screenshot is saved.
         """
-        _uuid = uuid.uuid4().hex
-        _tmp_path = f"/data/local/tmp/_tmp_{_uuid}.jpeg"
-        self.shell(f"snapshot_display -f {_tmp_path}")
-        self.pull_file(_tmp_path, path)
-        self.shell(f"rm -rf {_tmp_path}")  # remove local path
-        return path
+        return self.hdc.screenshot(path, method=method)
 
     def shell(self, cmd) -> CommandResult:
         return self.hdc.shell(cmd)
@@ -486,3 +487,4 @@ class Driver:
         """
         from ._xpath import _XPath
         return _XPath(self)
+
